@@ -19,9 +19,9 @@ a how-it-works explainer, handbook, runbook, decision record, or a summary of a 
 
 ### What a page looks like
 
-These screenshots come from [`demo/price-lookup-demo.html`](demo/price-lookup-demo.html), a
-demo page about a made-up price API. Download the file and open it in a browser to try the
-animations, the stepper and the slider.
+**[Open the live demo →](https://soonnick0123.github.io/agent-skills/demo/price-lookup-demo.html)**
+A demo page about a made-up price API. Try the animations, the stepper, the slider, the theme
+switch and the text size. The source is [`demo/price-lookup-demo.html`](demo/price-lookup-demo.html).
 
 **Header**: title, lead, the "Based on" box and the contents.
 
