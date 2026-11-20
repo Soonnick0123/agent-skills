@@ -18,6 +18,9 @@ a how-it-works explainer, handbook, runbook, decision record, or a summary of a 
   have read. On a wide screen the contents stay in a side column; on smaller screens they open
   from the bar. Theme (light / dark / auto) and text size (87.5 % to 150 %) sit behind one "Aa"
   button. The bar hides while you scroll down and comes back when you scroll up.
+- **PDF export**: the PDF button opens the browser's print window. Choose "Save as PDF". The
+  print styles remove the bar and the controls, keep the page light, print the stepper as a
+  list of stages and keep cards on one page.
   Phone layout and back to top. No external files: the page works offline.
 
 ### What a page looks like

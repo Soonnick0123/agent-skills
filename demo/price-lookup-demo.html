@@ -59,6 +59,15 @@ h1 { font-size: 2rem; line-height: 1.25; margin: 0; font-weight: 700; letter-spa
 h2 { font-size: 1.5rem; line-height: 1.33; margin: 0; font-weight: 700; }
 h3 { font-size: 1.125rem; line-height: 1.55; margin: 0; font-weight: 700; }
 p { margin: 0; }
+/* Lines of running text stop at about 72 characters, so the eye finds the next line. */
+main :where(p, li) { max-width: 72ch; }
+/* Section link: the "#" after each h2 goes to the section and copies its link. */
+.h-anchor { display: inline-block; min-width: 1.5rem; margin-left: 0.25rem; border-radius: 0.25rem; text-align: center;
+  color: var(--muted); font-weight: 400; text-decoration: none; opacity: 0; transition: opacity .15s cubic-bezier(0,0,.2,1); }
+h2:hover .h-anchor, .h-anchor:focus-visible { opacity: 1; }
+.h-anchor:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+@media (hover: none) { .h-anchor { opacity: .5; } }
+.h-anchor.is-copied { opacity: 1; color: var(--ok); font-size: 0.875rem; font-weight: 700; }
 .small { font-size: 0.875rem; line-height: 1.43; }
 :lang(zh) body, body:lang(zh) { line-height: 1.75; }
 
@@ -136,7 +145,7 @@ p { margin: 0; }
 main [id] { scroll-margin-top: 72px; }
 /* Phone: the bar names only the current section, in full weight. */
 @media (max-width: 40rem) {
-  .bar-title, .bar-sep { display: none; }
+  .bar-title, .bar-sep, .pdf-btn span { display: none; }
   .bar-section { color: var(--text); font-weight: 700; }
 }
 
@@ -167,10 +176,18 @@ ul, ol { margin: 0; padding-left: 1.5rem; display: flex; flex-direction: column;
 table { width: 100%; border-collapse: collapse; font-size: 0.875rem; line-height: 1.25rem; }
 th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--muted); font-weight: 700; }
+/* Cells break between words, never inside one: a table too wide for a phone scrolls in .scroll. */
+th, td, td code { overflow-wrap: break-word; }
 .callout { border-radius: 0.75rem; padding: 1rem; background: var(--primary-soft); color: var(--on-primary-soft); display: flex; flex-direction: column; gap: 0.5rem; }
 .callout.warn { background: var(--warn-soft); color: var(--warn); }
 .callout.neutral { background: var(--surface-2); color: var(--text); }
 .callout .label { font-size: 0.75rem; line-height: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+/* "Based on": a quiet note under the lead. It must be there, but it must not pull the eye
+   away from the content. */
+.based-on { margin-top: 0.25rem; padding-left: 1rem; border-left: 2px solid var(--line); display: flex; flex-direction: column;
+  gap: 0.25rem; color: var(--muted); font-size: 0.875rem; line-height: 1.25rem; }
+.based-on .label { font-size: 0.75rem; line-height: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.based-on ul { gap: 0.25rem; }
 button { font: 700 0.875rem/1.25rem var(--font); min-height: 2.75rem; padding: 0 1rem; border-radius: 0.5rem; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; }
 @media (hover: hover) { button:hover { background: var(--surface-2); } }
 button:focus-visible, input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -256,7 +273,47 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
-@media print { .doc-bar, .toc-side, .to-top-wrap { display: none; } }
+/* On paper: the stepper is a list of all its stages (the diagram is in the overview), and the
+   overview diagram shows every arrow the same, without the moving dot. */
+@media print {
+  .stepper .bar, .stepper .scroll, .stepper .stage-text, .controls { display: none !important; }
+  .step[aria-current="step"] { background: var(--surface-2); border-color: var(--line); }
+  .step[aria-current="step"] .n, .step[aria-current="step"] .d { color: var(--muted); }
+  .dg .dot { display: none; }
+  .dg .dim { opacity: 1; }
+  .dg .edge.cur path, .dg .edge.cur.opt path { stroke: var(--muted); stroke-width: 1.5; }
+  .dg .edge.cur .badge circle, .dg .edge.cur.opt .badge circle { fill: var(--surface); stroke: var(--muted); }
+  .dg .edge.cur .badge text { fill: var(--text); }
+  .dg .edge.cur .wlabel { fill: var(--muted); font-weight: 400; }
+  .dg .node.on rect { fill: var(--surface-2); stroke: var(--line); }
+}
+/* ---------- Print and PDF ----------
+   The PDF button calls window.print(); the reader picks "Save as PDF" as the printer.
+   The PDF file name comes from <title>. On paper the page is always light, at one text size,
+   without the bar, the side list and the controls. Mark a part that only works on screen
+   (a slider, a "Try it" box) with .no-print; mark a part only for paper with .print-only. */
+.print-only { display: none; }
+@media print {
+  :root:root:root { --bg: #ffffff; --surface: #ffffff; --surface-2: #f3eefc; --line: #e4ddf2;
+    --text: #1c1a22; --muted: #5d5868; --primary: #6750a4; --primary-soft: #e9ddff;
+    --on-primary-soft: #4f378b; --warn: #8a5300; --warn-soft: #ffe2bd; --err: #b3261e;
+    --err-soft: #f9dedc; --ok: #1f6b3a; --ok-soft: #d4f1dc; --code-bg: #f1ecf9;
+    color-scheme: light; }
+  @page { margin: 16mm 14mm; }
+  html { font-size: 87.5% !important; }
+  body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .doc-bar, .toc-side, .to-top-wrap, .scroll-hint, .h-anchor, .no-print { display: none !important; }
+  .print-only { display: block; }
+  .layout { display: block; padding: 0; }
+  main { max-width: none; margin: 0; padding: 0; gap: 2rem; }
+  .scroll { overflow: visible; }
+  .scroll > svg { min-width: 0 !important; }
+  h2, h3 { break-after: avoid; }
+  .card, .callout, .based-on, tr, svg, li { break-inside: avoid; }
+  main a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.75rem; color: var(--muted); }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+.print-meta { max-width: none; font-size: 0.75rem; line-height: 1rem; color: var(--muted); padding-bottom: 0.5rem; border-bottom: 1px solid var(--line); }
 </style>
 </head>
 <body>
@@ -265,6 +322,8 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
     <button type="button" class="nav-btn" aria-expanded="false" aria-controls="docNav">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Contents</span></button>
     <p class="bar-where" aria-hidden="true"><span class="bar-title"></span><span class="bar-sep">/</span><span class="bar-section"></span></p>
+    <button type="button" class="pdf-btn" aria-label="Save as PDF" title="Save as PDF: in the print window, choose Save as PDF">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>PDF</span></button>
     <button type="button" class="set-btn" aria-expanded="false" aria-controls="docSettings" aria-label="Display settings" title="Display settings">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 19 7.5 5h1L14 19M4.2 14h7.6M15 19l3.5-9h.5l3.5 9M16 16.5h5.5"/></svg></button>
     <!-- Both contents lists are built from each main section[id] and its h2; do not write them by hand. -->
@@ -295,7 +354,7 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
   <h1>How a price lookup works</h1>
   <p class="lead">This page tells you how the shop gets the price of a product. It also tells you what occurs when a client sends too many requests.</p>
   
-  <div class="callout neutral small">
+  <div class="based-on">
     <span class="label">Based on</span>
     <ul>
       <li>The design notes of the Price API, version 2.</li>
@@ -421,7 +480,7 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
       <li>From 80 requests per minute, the gateway rejects the request with 429.</li>
     </ul>
   </div>
-  <div class="card">
+  <div class="card no-print">
     <h3>Try it: change the requests per minute</h3>
     <div class="track" aria-hidden="true">
       <div class="axis"></div><div class="band warn" id="bandWarn"></div><div class="band err" id="bandErr"></div>
@@ -732,13 +791,39 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
   if (h1) bar.querySelector('.bar-title').textContent = h1.textContent;
   var sections = Array.prototype.filter.call(document.querySelectorAll('main section[id]'),
     function (s) { return s.querySelector('h2'); });
+  var titles = sections.map(function (s) { return s.querySelector('h2').textContent.trim(); });
   var links = [];
   document.querySelectorAll('.toc').forEach(function (list) {
-    sections.forEach(function (s) {
+    sections.forEach(function (s, i) {
       var li = document.createElement('li'), a = document.createElement('a');
-      a.href = '#' + s.id; a.textContent = s.querySelector('h2').textContent;
+      a.href = '#' + s.id; a.textContent = titles[i];
       li.append(a); list.append(li); links.push(a);
     });
+  });
+
+  // Section links: a "#" after each h2. It goes to the section and copies the section's link.
+  sections.forEach(function (s, i) {
+    var a = document.createElement('a');
+    a.className = 'h-anchor'; a.href = '#' + s.id; a.textContent = '#';
+    a.setAttribute('aria-label', 'Copy the link to ' + titles[i]);
+    a.addEventListener('click', function () {
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(location.href.split('#')[0] + '#' + s.id).then(function () {
+        a.textContent = 'Link copied'; a.classList.add('is-copied');
+        setTimeout(function () { a.textContent = '#'; a.classList.remove('is-copied'); }, 1500);
+      }, function () {});
+    });
+    s.querySelector('h2').append(a);
+  });
+
+  // PDF: the browser's print window makes the PDF. A line at the top of the paper says when.
+  var meta = document.createElement('p');
+  meta.className = 'print-only print-meta';
+  document.querySelector('main').prepend(meta);
+  window.addEventListener('beforeprint', function () {
+    var t = new Date(), p = function (n) { return String(n).padStart(2, '0'); };
+    meta.textContent = 'Exported on ' + t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate()) +
+      (/^https?:/.test(location.protocol) ? ' from ' + location.href.split('#')[0] : '') + '.';
   });
   if (!sections.length) { navBtn.hidden = true; side.hidden = true; }
 
@@ -756,6 +841,10 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
   var anyOpen = function () { return pops.some(function (p) { return !p[1].hidden; }); };
   pops.forEach(function (p) { p[0].addEventListener('click', function () { setOpen(p[0], p[1], p[1].hidden); }); });
   navPop.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(navBtn, navPop, false); });
+  bar.querySelector('.pdf-btn').addEventListener('click', function () {
+    pops.forEach(function (p) { setOpen(p[0], p[1], false); });
+    window.print();
+  });
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
     pops.forEach(function (p) { if (!p[1].hidden) { setOpen(p[0], p[1], false); p[0].focus(); } });
@@ -785,7 +874,7 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
     sections.forEach(function (s) { if (s.getBoundingClientRect().top <= line) cur = s; });
     if (cur === current) return;
     current = cur;
-    whereSection.textContent = cur ? cur.querySelector('h2').textContent : '';
+    whereSection.textContent = cur ? titles[sections.indexOf(cur)] : '';
     links.forEach(function (a) { a.setAttribute('aria-current', String(!!cur && a.hash === '#' + cur.id)); });
     var mark = side.querySelector('[aria-current="true"]');
     if (mark && getComputedStyle(side).display !== 'none') {

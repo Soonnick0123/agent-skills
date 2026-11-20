@@ -87,8 +87,9 @@ Choose from this menu. Use the order shown. Leave out a section with nothing to 
 
 Component notes:
 
-- **"Based on" box** (依據): a small box in the header, under the lead. Each item is
-  one sentence:
+- **"Based on" box** (依據): a quiet note in the header, under the lead (`.based-on`: a
+  line on its left, small muted text, no fill). It must be there, but it must not pull the eye
+  away from the content. Each item is one sentence:
   - the sources used, with a version when there is one (repo and commit, file names, the date
     of the conversation, a spec version);
   - the related parts that are **not** covered, or covered only from a secondary source
@@ -186,9 +187,30 @@ The bar answers "where am I, and how far is it?" without taking reading space.
   - Both lists mark the section that the reader is in.
 - **Display settings** (the "Aa" button) opens the theme switch (Auto / Light / Dark) and the
   text size (A− / 100 % / A+). Readers set these once, so they do not stay in the bar.
+- **PDF** (the download button) opens the browser's print window; the reader chooses "Save
+  as PDF". See "Print and PDF" below.
+- Every `<h2>` gets a "#" link (the shell adds it). It goes to the section and copies the
+  section's link, so a reader can send someone one part of the page.
 - The page's own header is `main > header`; style it with that selector, because the bar is a
   `<header>` too. `<main>` sits inside `<div class="layout">` with the side list; keep that
   wrapper.
+
+### Print and PDF
+
+The shell's print styles turn the page into a clean document, so "Save as PDF" in any
+browser gives a good PDF. Nothing outside the page is needed.
+
+- `<title>` becomes the PDF file name. Make it the page title, not "Document".
+- On paper the page is always light and at one text size. The bar, the side list, Back to
+  top and the "#" links are not printed. A line at the top says the export date.
+- Mark a part that only works on screen (a slider, a "Try it" box) with `class="no-print"`.
+  Its rule must also be in words nearby (the Rule box), so the PDF loses nothing.
+- Mark a part for paper only with `class="print-only"`.
+- The stepper prints as a list of all its stages. The overview diagram prints without the
+  moving dot and with every arrow in the same style.
+- Cards, callouts, table rows and diagrams do not split across pages. Headings stay with the
+  content under them.
+- A link to a web page prints its address after the link text.
 
 ### Light and dark
 
@@ -226,6 +248,9 @@ The bar answers "where am I, and how far is it?" without taking reading space.
 
 ### Other rules
 
+- Running text (`p`, `li` in `main`) stops at 72 characters per line; the shell sets this.
+- Table cells break between words, never inside a word. A table too wide for a phone scrolls
+  in its `.scroll` wrapper.
 - Spacing scale 4/8/12/16/24/32/48 px (0.25–3 rem). Type sizes 12/14/16/18/24/32 px
   (0.75–2 rem), line-heights on the 4 px grid. Times and counts use
   `font-variant-numeric: tabular-nums`.
@@ -265,6 +290,9 @@ The bar answers "where am I, and how far is it?" without taking reading space.
   150 %, add a script to a copy of the page that clicks the shell's buttons. To screenshot a
   part further down, add `html{scroll-behavior:auto!important}` to the copy before you scroll,
   or the smooth scroll is still moving when the screenshot is taken.
+- The PDF is clean: open the print preview (or `Page.printToPDF` in headless Chrome after a
+  `beforeprint` event) and check that nothing on screen only (sliders, buttons) is printed, no
+  card is cut across two pages, and the page is light.
 - An interactive demo gives the same answer as the real rule at the edges (on the boundary,
   just before, just after, several periods later).
 - Run the STE self-check in `references/ste100-rules.md`.
