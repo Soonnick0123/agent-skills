@@ -14,8 +14,8 @@ so nobody misreads it.
 Two assets:
 
 - `assets/page-shell.html` — **start every page from this file.** It has the colour tokens
-  for light and dark, the theme switch (Auto / Light / Dark), the text-size buttons
-  (A− / A / A+), the rem-based type scale, and the phone-width rules (section 6).
+  for light and dark, the page bar (contents menu, page title, theme switch Auto / Light /
+  Dark, text size A− / A / A+), the rem-based type scale, and the phone-width rules (section 6).
 - `assets/component-reference.html` — every component on the shell, with placeholder text in
   the target style: header with the "Based on" box, key points, terms, the numbered flow
   diagram, procedures, the stepper paired with the diagram, the interactive rule demo, UI state
@@ -68,7 +68,7 @@ Choose from this menu. Use the order shown. Leave out a section with nothing to 
 
 | Section | Explainer | Handbook | Runbook | Summary | Decision |
 |---|---|---|---|---|---|
-| Header: pill label, title, 2-sentence lead, TOC | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Header: pill label, title, 2-sentence lead (the contents menu is in the page bar) | ✓ | ✓ | ✓ | ✓ | ✓ |
 | "Based on" box, directly under the lead | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Key points / TL;DR (3–6 bullets) | | ✓ | | ✓ | ✓ |
 | Terms table | ✓ | ✓ | ✓ | if needed | if needed |
@@ -163,8 +163,22 @@ Chinese and English), and use the CJK font stack and line-height from the design
 ## 6. Visual design
 
 - **One self-contained file.** Inline CSS and JS. No CDN, no external fonts. It works offline.
-- **Start from `assets/page-shell.html`** and keep its three reader controls. Readers open
-  these pages on phones, in dark rooms and on projectors, and some need larger text.
+- **Start from `assets/page-shell.html`** and keep its page bar. Readers open these pages on
+  phones, in dark rooms and on projectors; some need larger text, and long pages need a way to
+  jump between sections.
+
+### Page bar
+
+- The bar is sticky on every screen. It slides up while the reader scrolls down and comes back
+  when they scroll up, near the top of the page, or when it has keyboard focus.
+- **Contents** opens a menu of the sections. The shell builds it from each `main section[id]`
+  and its `<h2>`, so give every section an `id` and an `<h2>`, and do not write a contents
+  list in the page. The menu marks the section that the reader is in, and closes on a link,
+  on Escape and on a click outside.
+- The bar shows the page title from the `<h1>`. On a phone the theme and text-size buttons move
+  into the menu, so the bar keeps room for the title.
+- The page's own header is `main > header`; style it with that selector, because the bar is a
+  `<header>` too.
 
 ### Light and dark
 
@@ -189,9 +203,7 @@ Chinese and English), and use the CJK font stack and line-height from the design
 ### Phone width
 
 - The page works at 360 px wide with no horizontal page scroll. Side gutter 16 px.
-- The controls bar is sticky only on wide screens. Below 40 rem it scrolls away with the
-  page, so a phone keeps the whole screen for reading.
-- The last item of `<main>` is a **Back to top** link (`href="#top"`, the controls bar has
+- The last item of `<main>` is a **Back to top** link (`href="#top"`, the page bar has
   `id="top"`), on desktop and on phone. It scrolls smoothly unless the reader asks for reduced
   motion, and it is hidden in print.
 - Multi-column grids become one column below 40 rem (`repeat(auto-fit, minmax(16rem, 1fr))`
@@ -231,6 +243,7 @@ Chinese and English), and use the CJK font stack and line-height from the design
 - The "Based on" box names every source used and every related part that is not covered.
 - In every flow diagram, a reader can tell the order of the calls without reading the text.
   The numbers on the arrows match the numbered list, and each stepper stage names its arrows.
+- The contents menu lists every section, and each link lands on its heading below the bar.
 - The page has the theme switch and the text-size buttons, and both work. No hard-coded colour
   is left (search the file for `#` colours outside the token blocks).
 - The page reads well in Light, in Dark, at 150 % text, and at 360 px wide. If a browser is

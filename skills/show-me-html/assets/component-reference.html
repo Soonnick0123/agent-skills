@@ -62,25 +62,45 @@ p { margin: 0; }
 .small { font-size: 0.875rem; line-height: 1.43; }
 :lang(zh) body, body:lang(zh) { line-height: 1.75; }
 
-/* ---------- Page controls (theme and text size) ----------
-   In px on purpose: the controls keep one size, so they never push themselves off screen
-   when the reader makes the text larger. */
-.doc-controls { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end;
-  padding: 8px 16px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--line); }
-.doc-controls .group { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
-.doc-controls button { font: 700 14px/1 var(--font); min-width: 44px; min-height: 44px; padding: 0 10px;
+/* ---------- Page bar: contents menu, page title, theme and text size ----------
+   Sticky on every screen. It slides up while the reader scrolls down and comes back when they
+   scroll up, so it never takes reading space for long. In px on purpose: the bar keeps one
+   size at every text size. */
+.doc-bar { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); transition: transform .2s cubic-bezier(.4,0,.2,1); }
+.doc-bar.is-hidden:not(:focus-within) { transform: translateY(-100%); }
+.bar-inner { max-width: 1040px; margin: 0 auto; display: flex; align-items: center; gap: 8px; padding: 8px 16px; }
+.bar-title { flex: 1; min-width: 0; font: 700 14px/20px var(--font); color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.doc-bar button { font: 700 14px/1 var(--font); min-width: 44px; min-height: 44px; padding: 0 10px;
   border: 0; background: none; color: var(--text); cursor: pointer; }
-.doc-controls button + button { border-left: 1px solid var(--line); }
-.doc-controls button[aria-pressed="true"] { background: var(--primary); color: var(--surface); }
-.doc-controls button:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
-@media (hover: hover) { .doc-controls button:hover:not([aria-pressed="true"]) { background: var(--surface-2); } }
+.doc-bar .nav-btn { display: inline-flex; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--surface); }
+.doc-bar .nav-btn[aria-expanded="true"] { background: var(--primary); border-color: var(--primary); color: var(--surface); }
+.settings { display: flex; flex-wrap: wrap; gap: 8px; }
+.settings .group { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.settings .group button + button { border-left: 1px solid var(--line); }
+.settings button[aria-pressed="true"] { background: var(--primary); color: var(--surface); }
+.doc-bar button:focus-visible, .nav-list a:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+@media (hover: hover) {
+  .settings button:hover:not([aria-pressed="true"]), .doc-bar .nav-btn:hover:not([aria-expanded="true"]),
+  .nav-list a:hover { background: var(--surface-2); }
+}
+.nav-panel { max-width: 1040px; margin: 0 auto; padding: 0 16px 16px; display: flex; flex-direction: column; gap: 16px;
+  max-height: calc(100vh - 61px); overflow-y: auto; }
+.nav-panel[hidden] { display: none; }
+.nav-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px; }
+.nav-list a { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 8px;
+  color: var(--text); text-decoration: none; font: 14px/20px var(--font); }
+.nav-list a[aria-current="true"] { background: var(--primary-soft); color: var(--on-primary-soft); font-weight: 700; }
+.panel-settings:empty { display: none; }
+/* A section heading reached from the menu is not hidden under the bar. */
+main [id] { scroll-margin-top: 72px; }
 
 /* ---------- Phone width ---------- */
 .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .scroll-hint { display: none; }
 @media (max-width: 40rem) {
-  .doc-controls { position: static; }  /* more room to read on a phone */
   main { gap: 2rem; }
   h1 { font-size: 1.625rem; }
   h2 { font-size: 1.25rem; }
@@ -88,7 +108,7 @@ p { margin: 0; }
 }
 
 /* ---------- Document components (rem, so they follow the text-size buttons) ---------- */
-header { display: flex; flex-direction: column; gap: 0.75rem; }
+main > header { display: flex; flex-direction: column; gap: 0.75rem; }
 .lead { color: var(--muted); max-width: 70ch; }
 section { display: flex; flex-direction: column; gap: 1rem; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
@@ -108,9 +128,6 @@ th { color: var(--muted); font-weight: 700; }
 .callout.warn { background: var(--warn-soft); color: var(--warn); }
 .callout.neutral { background: var(--surface-2); color: var(--text); }
 .callout .label { font-size: 0.75rem; line-height: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
-.toc { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.toc a { font-size: 0.875rem; line-height: 1.25rem; color: var(--primary); text-decoration: none; padding: 0.25rem 0.75rem; border-radius: 9999px; border: 1px solid var(--line); background: var(--surface); }
-@media (hover: hover) { .toc a:hover { background: var(--surface-2); } }
 button { font: 700 0.875rem/1.25rem var(--font); min-height: 2.75rem; padding: 0 1rem; border-radius: 0.5rem; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; }
 @media (hover: hover) { button:hover { background: var(--surface-2); } }
 button:focus-visible, input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -196,22 +213,33 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
-@media print { .doc-controls, .to-top-wrap { display: none; } }
+@media print { .doc-bar, .to-top-wrap { display: none; } }
 </style>
 </head>
 <body>
-<div class="doc-controls" id="top" role="toolbar" aria-label="Page settings">
-  <div class="group" role="group" aria-label="Theme">
-    <button type="button" data-theme-btn="auto" aria-pressed="true" title="Follow the system">Auto</button>
-    <button type="button" data-theme-btn="light" aria-pressed="false">Light</button>
-    <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+<header class="doc-bar" id="top">
+  <div class="bar-inner">
+    <button type="button" class="nav-btn" aria-expanded="false" aria-controls="docNav"><span aria-hidden="true">☰</span><span>Contents</span></button>
+    <span class="bar-title" aria-hidden="true"></span>
+    <div class="settings" role="toolbar" aria-label="Page settings">
+      <div class="group" role="group" aria-label="Theme">
+        <button type="button" data-theme-btn="auto" aria-pressed="true" title="Follow the system">Auto</button>
+        <button type="button" data-theme-btn="light" aria-pressed="false">Light</button>
+        <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+      </div>
+      <div class="group" role="group" aria-label="Text size">
+        <button type="button" data-scale-btn="-1" aria-label="Smaller text">A−</button>
+        <button type="button" data-scale-btn="0" aria-label="Default text size">A</button>
+        <button type="button" data-scale-btn="1" aria-label="Larger text">A+</button>
+      </div>
+    </div>
   </div>
-  <div class="group" role="group" aria-label="Text size">
-    <button type="button" data-scale-btn="-1" aria-label="Smaller text">A−</button>
-    <button type="button" data-scale-btn="0" aria-label="Default text size">A</button>
-    <button type="button" data-scale-btn="1" aria-label="Larger text">A+</button>
-  </div>
-</div>
+  <!-- The list is built from each main section[id] and its h2; do not write it by hand. -->
+  <nav class="nav-panel" id="docNav" aria-label="Contents" hidden>
+    <ol class="nav-list"></ol>
+    <div class="panel-settings"></div>
+  </nav>
+</header>
 <main>
 <!--
   COMPONENT REFERENCE for the show-me-html skill.
@@ -220,7 +248,7 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
   The placeholder sentences are written in the target style (ASD-STE100): keep that style.
 -->
 
-<!-- COMPONENT: Header. Always. Pill label, title, 2-sentence lead, "Based on" box, TOC. -->
+<!-- COMPONENT: Header. Always. Pill label, title, 2-sentence lead, "Based on" box. The contents menu in the page bar is built from the sections; no TOC here. -->
 <header>
   <span class="pill">Area · Topic</span>
   <h1>How [the subject] works</h1>
@@ -234,12 +262,6 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
       <li>[How the facts were checked, for example: Not tested on a real system.]</li>
     </ul>
   </div>
-  <nav class="toc" aria-label="Contents">
-    <a href="#key-points">1. Key points</a><a href="#terms">2. Terms</a><a href="#flow">3. Overall flow</a>
-    <a href="#procedures">4. Procedures</a><a href="#lifecycle">5. Lifecycle</a><a href="#demo">6. The rule</a>
-    <a href="#states">7. States</a><a href="#conditions">8. Conditions</a><a href="#options">9. Options</a>
-    <a href="#decisions">10. Decisions</a><a href="#open">11. Open items</a><a href="#sources">12. Sources</a>
-  </nav>
 </header>
 
 <!-- COMPONENT: Key points. Handbook, summary, decision record. 3 to 6 bullets. -->
@@ -663,6 +685,61 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
       save('doc-scale', next === 1 ? null : next);
     });
   });
+
+  // Page bar. The contents menu lists every main section[id] by its h2.
+  var bar = document.querySelector('.doc-bar'), navBtn = bar.querySelector('.nav-btn');
+  var panel = document.getElementById('docNav'), list = panel.querySelector('.nav-list');
+  var settings = bar.querySelector('.settings'), h1 = document.querySelector('main h1');
+  if (h1) bar.querySelector('.bar-title').textContent = h1.textContent;
+  var sections = Array.prototype.filter.call(document.querySelectorAll('main section[id]'),
+    function (s) { return s.querySelector('h2'); });
+  var links = sections.map(function (s) {
+    var li = document.createElement('li'), a = document.createElement('a');
+    a.href = '#' + s.id; a.textContent = s.querySelector('h2').textContent;
+    li.append(a); list.append(li); return a;
+  });
+  if (!links.length) navBtn.hidden = true;
+  var setOpen = function (open) {
+    navBtn.setAttribute('aria-expanded', String(open));
+    panel.hidden = !open;
+    if (open) bar.classList.remove('is-hidden');
+  };
+  navBtn.addEventListener('click', function () { setOpen(panel.hidden); });
+  links.forEach(function (a) { a.addEventListener('click', function () { setOpen(false); }); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !panel.hidden) { setOpen(false); navBtn.focus(); }
+  });
+  document.addEventListener('click', function (e) { if (!panel.hidden && !bar.contains(e.target)) setOpen(false); });
+
+  // On a phone the theme and size buttons move into the menu, so the bar keeps room for the title.
+  var mq = window.matchMedia('(max-width: 40rem)');
+  var placeSettings = function () {
+    (mq.matches ? panel.querySelector('.panel-settings') : bar.querySelector('.bar-inner')).append(settings);
+  };
+  if (mq.addEventListener) mq.addEventListener('change', placeSettings); else mq.addListener(placeSettings);
+  placeSettings();
+
+  // The bar hides while the reader scrolls down and comes back when they scroll up.
+  // Decided on every scroll event (cheap), so a fast change of direction is never lost.
+  var lastY = window.scrollY;
+  window.addEventListener('scroll', function () {
+    var y = window.scrollY;
+    if (Math.abs(y - lastY) < 6) return;
+    if (!panel.hidden || y < 80 || y < lastY) bar.classList.remove('is-hidden');
+    else bar.classList.add('is-hidden');
+    lastY = y;
+  }, { passive: true });
+
+  // The menu marks the section that the reader is in.
+  if ('IntersectionObserver' in window && links.length) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        links.forEach(function (a) { a.setAttribute('aria-current', String(a.hash === '#' + en.target.id)); });
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function (s) { io.observe(s); });
+  }
 })();
 </script>
 </body>

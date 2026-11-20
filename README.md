@@ -14,8 +14,9 @@ a how-it-works explainer, handbook, runbook, decision record, or a summary of a 
   of the one rule that readers get wrong.
 - **Honest scope**: every page opens with a "Based on" box that lists its sources and what it
   does not cover.
-- **Reader controls**: light / dark / auto theme, text size from 87.5 % to 150 %, phone layout,
-  back to top. No external files: the page works offline.
+- **Reader controls**: a page bar with a contents menu, light / dark / auto theme and text size
+  from 87.5 % to 150 %. It hides while you scroll down and comes back when you scroll up.
+  Phone layout and back to top. No external files: the page works offline.
 
 ### What a page looks like
 
@@ -23,16 +24,18 @@ a how-it-works explainer, handbook, runbook, decision record, or a summary of a 
 A demo page about a made-up price API. Try the animations, the stepper, the slider, the theme
 switch and the text size. The source is [`demo/price-lookup-demo.html`](demo/price-lookup-demo.html).
 
-**Header**: title, lead, the "Based on" box and the contents.
+**Page bar and header**: the contents menu (open here), theme and text size, then the title,
+the lead and the "Based on" box.
 
-![Header of a generated page in light mode](docs/screenshots/header-light.png)
+![Page bar with the contents menu open, and the page header](docs/screenshots/header-light.png)
 
 **Flow diagram**: numbered arrows in call order. A dot runs the calls one after another; dashed
 arrows occur only sometimes.
 
 ![Flow diagram with numbered arrows](docs/screenshots/flow-diagram.png)
 
-**Phone, dark mode**: the stepper highlights the parts of the selected stage, and the slider
+**Phone, dark mode**: the page bar keeps the title and the contents menu; the theme and text
+size move into the menu. The stepper highlights the parts of the selected stage, and the slider
 shows the result of the rule live.
 
 ![Stepper and rule demo on a phone in dark mode](docs/screenshots/phone-dark.png)
