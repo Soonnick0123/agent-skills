@@ -173,9 +173,10 @@ Chinese and English), and use the CJK font stack and line-height from the design
 
 The bar answers "where am I, and how far is it?" without taking reading space.
 
-- The bar is sticky on every screen. It slides up while the reader scrolls down and comes back
-  when they scroll up, near the top of the page, or when a menu is open or it has keyboard
-  focus. A thin line along its bottom edge shows how far the reader has read.
+- The bar is sticky on every screen. On a desktop (mouse or trackpad) it always stays. On a
+  touch screen it slides up while the reader scrolls down, to give the text more room, and
+  comes back when they scroll up, near the top of the page, or when a menu is open or it has
+  keyboard focus. A thin line along its bottom edge shows how far the reader has read.
 - The bar names the current section ("Page title / 3. Overall flow"). The page title appears
   only after the `<h1>` has scrolled away, so it never shows twice. On a phone the bar shows the
   section name only.

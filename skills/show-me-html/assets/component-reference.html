@@ -74,8 +74,8 @@ h2:hover .h-anchor, .h-anchor:focus-visible { opacity: 1; }
 /* ---------- Page bar and contents ----------
    One slim sticky bar that tells the reader where they are: the page title (only after the h1
    has scrolled away, so it never shows twice), the section they are in, and a reading-progress
-   line along its bottom edge. It slides up while the reader scrolls down and comes back when
-   they scroll up.
+   line along its bottom edge. On a touch screen it slides up while the reader scrolls down and
+   comes back when they scroll up; on a desktop it always stays.
    Contents: a dropdown below 1200 px; a fixed side list at 1200 px and wider, so a desktop reader
    can jump without opening a menu. Theme and text size sit behind one "Aa" button: readers set
    them once, so they do not take space in the bar.
@@ -84,6 +84,8 @@ h2:hover .h-anchor, .h-anchor:focus-visible { opacity: 1; }
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line);
   transition: transform .2s cubic-bezier(.4,0,.2,1); }
 .doc-bar.is-hidden:not(:focus-within) { transform: translateY(-100%); }
+/* With a mouse or trackpad (a desktop), the screen is tall enough: the bar always stays. */
+@media (hover: hover) and (pointer: fine) { .doc-bar.is-hidden:not(:focus-within) { transform: none; } }
 .bar-inner { position: relative; max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 8px; padding: 4px 16px; }
 .bar-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--primary);
   transform-origin: 0 50%; transform: scaleX(0); }
