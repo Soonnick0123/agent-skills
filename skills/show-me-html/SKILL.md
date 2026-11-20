@@ -188,8 +188,10 @@ The bar answers "where am I, and how far is it?" without taking reading space.
   - Both lists mark the section that the reader is in.
 - **Display settings** (the "Aa" button) opens the theme switch (Auto / Light / Dark) and the
   text size (A− / 100 % / A+). Readers set these once, so they do not stay in the bar.
-- **PDF** (the download button) opens the browser's print window; the reader chooses "Save
-  as PDF". See "Print and PDF" below.
+- **PDF** (the download button) first shows a short help: in the print window, select "Save
+  as PDF" in Printer or Destination, then Save. When a real printer is the default, readers
+  do not find that option alone. The help has "Do not show this again". Then the button opens
+  the browser's print window. See "Print and PDF" below.
 - Every `<h2>` gets a "#" link (the shell adds it). It goes to the section and copies the
   section's link, so a reader can send someone one part of the page.
 - The page's own header is `main > header`; style it with that selector, because the bar is a

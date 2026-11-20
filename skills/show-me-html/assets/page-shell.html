@@ -143,6 +143,24 @@ h2:hover .h-anchor, .h-anchor:focus-visible { opacity: 1; }
   .toc-side .toc a[aria-current="true"] { background: none; color: var(--primary); border-left-color: var(--primary); }
   .doc-bar .nav-btn { display: none; }
 }
+/* PDF help: the print window does not say "PDF" by default when a real printer is the default,
+   so the PDF button first says where "Save as PDF" is. "Do not show this again" is saved. */
+.pdf-dialog { width: min(400px, calc(100vw - 32px)); padding: 24px; border: 1px solid var(--line); border-radius: 16px;
+  background: var(--surface); color: var(--text); box-shadow: 0 12px 32px rgb(0 0 0 / .24); font: 14px/20px var(--font); }
+.pdf-dialog::backdrop { background: rgb(0 0 0 / .4); }
+.pdf-dialog[open] { display: flex; flex-direction: column; gap: 16px; animation: pop-in .25s cubic-bezier(0,0,.2,1); }
+.pdf-dialog h2 { font: 700 18px/28px var(--font); margin: 0; }
+.pdf-dialog ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.pdf-dialog .note { color: var(--muted); margin: 0; }
+.pdf-dialog label { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+.pdf-dialog input { width: 18px; height: 18px; margin: 0; accent-color: var(--primary); }
+.pdf-dialog .actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.pdf-dialog button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 80px;
+  padding: 0 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text);
+  font: 500 14px/20px var(--font); cursor: pointer; }
+.pdf-dialog button.primary { background: var(--primary); border-color: var(--primary); color: var(--surface); }
+.pdf-dialog button:focus-visible, .pdf-dialog input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+@media (hover: hover) { .pdf-dialog button:not(.primary):hover { background: var(--surface-2); } }
 /* A section heading reached from the contents is not hidden under the bar. */
 main [id] { scroll-margin-top: 72px; }
 /* Phone: the bar names only the current section, in full weight. */
@@ -225,6 +243,20 @@ main [id] { scroll-margin-top: 72px; }
   </div>
   <div class="bar-progress" aria-hidden="true"></div>
 </header>
+<dialog class="pdf-dialog" aria-labelledby="pdfTitle">
+  <h2 id="pdfTitle">Save this page as a PDF</h2>
+  <ol>
+    <li>Click <b>Open print window</b>.</li>
+    <li>In <b>Printer</b> or <b>Destination</b>, select <b>Save as PDF</b>.</li>
+    <li>Click <b>Save</b>.</li>
+  </ol>
+  <p class="note">In Safari, click <b>PDF</b> at the bottom left, then <b>Save as PDF</b>.</p>
+  <label><input type="checkbox" class="pdf-skip"> Do not show this again</label>
+  <div class="actions">
+    <button type="button" value="cancel">Cancel</button>
+    <button type="button" class="primary" value="print">Open print window</button>
+  </div>
+</dialog>
 <div class="layout">
 <aside class="toc-side"><nav aria-label="Contents"><p class="pop-label">On this page</p><ol class="toc"></ol></nav></aside>
 <main>
@@ -335,9 +367,25 @@ main [id] { scroll-margin-top: 72px; }
   var anyOpen = function () { return pops.some(function (p) { return !p[1].hidden; }); };
   pops.forEach(function (p) { p[0].addEventListener('click', function () { setOpen(p[0], p[1], p[1].hidden); }); });
   navPop.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(navBtn, navPop, false); });
+  // PDF: first a short help that says where "Save as PDF" is, unless the reader turned it off.
+  var pdfDlg = document.querySelector('.pdf-dialog'), pdfSkip = pdfDlg.querySelector('.pdf-skip');
+  var printNow = function () { setTimeout(function () { window.print(); }, 50); };
   bar.querySelector('.pdf-btn').addEventListener('click', function () {
     pops.forEach(function (p) { setOpen(p[0], p[1], false); });
-    window.print();
+    var skip = false;
+    try { skip = localStorage.getItem('doc-pdf-help') === 'off'; } catch (e) {}
+    if (skip || !pdfDlg.showModal) printNow(); else pdfDlg.showModal();
+  });
+  pdfDlg.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    // A click on the dimmed area outside the box closes it.
+    var r = pdfDlg.getBoundingClientRect();
+    if (e.target === pdfDlg && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) pdfDlg.close();
+    if (!b) return;
+    pdfDlg.close();
+    if (b.value !== 'print') return;
+    if (pdfSkip.checked) save('doc-pdf-help', 'off');
+    printNow();
   });
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
