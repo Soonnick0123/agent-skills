@@ -269,19 +269,22 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
-/* On paper: the stepper is a list of all its stages (the diagram is in the overview), and the
-   overview diagram shows every arrow the same, without the moving dot. */
+/* On paper: the stepper prints one block per stage (.stage-print, built by the script): the
+   diagram with that stage highlighted, and its sentences. The overview diagram shows every
+   arrow the same, without the moving dot. */
+.stage-print { flex-direction: column; gap: 1.5rem; }
+.stage-print-item { display: flex; flex-direction: column; gap: 0.5rem; }
+.stage-print-item + .stage-print-item { padding-top: 1.5rem; border-top: 1px solid var(--line); }
 @media print {
-  .stepper .bar, .stepper .scroll, .stepper .stage-text, .controls { display: none !important; }
-  .step[aria-current="step"] { background: var(--surface-2); border-color: var(--line); }
-  .step[aria-current="step"] .n, .step[aria-current="step"] .d { color: var(--muted); }
+  .stepper .steps, .stepper .bar, .stepper .scroll, .stepper .stage-text, .controls { display: none !important; }
+  .stepper .stage-print { display: flex; }
+  .card.stepper { border: 0; padding: 0; background: none; }
+  .stage-print-item { break-inside: avoid; }
   .dg .dot { display: none; }
-  .dg .dim { opacity: 1; }
-  .dg .edge.cur path, .dg .edge.cur.opt path { stroke: var(--muted); stroke-width: 1.5; }
-  .dg .edge.cur .badge circle, .dg .edge.cur.opt .badge circle { fill: var(--surface); stroke: var(--muted); }
-  .dg .edge.cur .badge text { fill: var(--text); }
-  .dg .edge.cur .wlabel { fill: var(--muted); font-weight: 400; }
-  .dg .node.on rect { fill: var(--surface-2); stroke: var(--line); }
+  .dg:not(.stage-dg) .edge.cur path, .dg:not(.stage-dg) .edge.cur.opt path { stroke: var(--muted); stroke-width: 1.5; }
+  .dg:not(.stage-dg) .edge.cur .badge circle, .dg:not(.stage-dg) .edge.cur.opt .badge circle { fill: var(--surface); stroke: var(--muted); }
+  .dg:not(.stage-dg) .edge.cur .badge text { fill: var(--text); }
+  .dg:not(.stage-dg) .edge.cur .wlabel { fill: var(--muted); font-weight: 400; }
 }
 /* ---------- Print and PDF ----------
    The PDF button calls window.print(); the reader picks "Save as PDF" as the printer.
@@ -730,6 +733,35 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
     timer = setInterval(() => show(cur + 1), 3000);
   };
   show(0);
+
+  // On paper nothing can be clicked, so each stage prints as its own block: the same diagram
+  // with that stage's parts and arrows highlighted (no dot), and the stage's sentences.
+  const paper = document.createElement('div');
+  paper.className = 'print-only stage-print';
+  STAGES.forEach((st, i) => {
+    const item = document.createElement('div');
+    item.className = 'stage-print-item';
+    const h = document.createElement('h3');
+    h.textContent = `${i + 1}. ${st.t}`;
+    const n = document.createElement('p');
+    n.className = 'small muted';
+    n.textContent = st.e.length ? `Arrow${st.e.length > 1 ? 's' : ''} ${st.e.join(' ')}` : 'No arrow';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'dg stage-dg');
+    svg.setAttribute('viewBox', document.getElementById('stepSvg').getAttribute('viewBox'));
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', `Stage ${i + 1}, ${st.t}: the parts and arrows of this stage are highlighted.`);
+    const m = draw(svg, 'p' + i);
+    m.dot.remove();
+    for (const [id, g] of Object.entries(m.nodes)) { g.classList.toggle('on', st.n.includes(id)); g.classList.toggle('dim', !st.n.includes(id)); }
+    for (const [id, e] of Object.entries(m.edges)) { e.g.classList.toggle('dim', !st.e.includes(id)); setCur(m, id, st.e.includes(id)); }
+    const ul = document.createElement('ul');
+    ul.className = 'small';
+    ul.append(...st.p.map((t) => Object.assign(document.createElement('li'), { textContent: t })));
+    item.append(h, n, svg, ul);
+    paper.append(item);
+  });
+  root.append(paper);
 
   // ---------- Interactive demo ----------
   // Replace with the real rule. Same formula as [the real function, e.g. Module.functionName].

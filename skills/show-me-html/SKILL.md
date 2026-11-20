@@ -207,8 +207,10 @@ browser gives a good PDF. Nothing outside the page is needed.
 - Mark a part that only works on screen (a slider, a "Try it" box) with `class="no-print"`.
   Its rule must also be in words nearby (the Rule box), so the PDF loses nothing.
 - Mark a part for paper only with `class="print-only"`.
-- The stepper prints as a list of all its stages. The overview diagram prints without the
-  moving dot and with every arrow in the same style.
+- The stepper prints one block per stage: the stage title and arrows, the diagram with that
+  stage's parts and arrows highlighted, and the stage's sentences. The script builds these
+  blocks from the same `STAGES` data, so nothing that the screen shows on a click is lost.
+  The overview diagram prints without the moving dot and with every arrow in the same style.
 - Cards, callouts, table rows and diagrams do not split across pages. Headings stay with the
   content under them.
 - A link to a web page prints its address after the link text.

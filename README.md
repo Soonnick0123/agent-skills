@@ -20,8 +20,8 @@ a how-it-works explainer, handbook, runbook, decision record, or a summary of a 
   button. On a phone the bar hides while you scroll down and comes
   back when you scroll up; on a desktop it always stays.
 - **PDF export**: the PDF button opens the browser's print window. Choose "Save as PDF". The
-  print styles remove the bar and the controls, keep the page light, print the stepper as a
-  list of stages and keep cards on one page.
+  print styles remove the bar and the controls, keep the page light, print each stepper
+  stage with its own diagram and keep cards on one page.
   Phone layout. No external files: the page works offline.
 
 ### What a page looks like
