@@ -14,8 +14,9 @@ so nobody misreads it.
 Two assets:
 
 - `assets/page-shell.html` — **start every page from this file.** It has the colour tokens
-  for light and dark, the page bar (contents menu, page title, theme switch Auto / Light /
-  Dark, text size A− / A / A+), the rem-based type scale, and the phone-width rules (section 6).
+  for light and dark, the page bar (current section, reading progress, contents, display
+  settings), the side contents list for wide screens, the rem-based type scale, and the
+  phone-width rules (section 6).
 - `assets/component-reference.html` — every component on the shell, with placeholder text in
   the target style: header with the "Based on" box, key points, terms, the numbered flow
   diagram, procedures, the stepper paired with the diagram, the interactive rule demo, UI state
@@ -68,7 +69,7 @@ Choose from this menu. Use the order shown. Leave out a section with nothing to 
 
 | Section | Explainer | Handbook | Runbook | Summary | Decision |
 |---|---|---|---|---|---|
-| Header: pill label, title, 2-sentence lead (the contents menu is in the page bar) | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Header: pill label, title, 2-sentence lead (the contents list is built by the shell) | ✓ | ✓ | ✓ | ✓ | ✓ |
 | "Based on" box, directly under the lead | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Key points / TL;DR (3–6 bullets) | | ✓ | | ✓ | ✓ |
 | Terms table | ✓ | ✓ | ✓ | if needed | if needed |
@@ -169,16 +170,25 @@ Chinese and English), and use the CJK font stack and line-height from the design
 
 ### Page bar
 
+The bar answers "where am I, and how far is it?" without taking reading space.
+
 - The bar is sticky on every screen. It slides up while the reader scrolls down and comes back
-  when they scroll up, near the top of the page, or when it has keyboard focus.
-- **Contents** opens a menu of the sections. The shell builds it from each `main section[id]`
-  and its `<h2>`, so give every section an `id` and an `<h2>`, and do not write a contents
-  list in the page. The menu marks the section that the reader is in, and closes on a link,
-  on Escape and on a click outside.
-- The bar shows the page title from the `<h1>`. On a phone the theme and text-size buttons move
-  into the menu, so the bar keeps room for the title.
+  when they scroll up, near the top of the page, or when a menu is open or it has keyboard
+  focus. A thin line along its bottom edge shows how far the reader has read.
+- The bar names the current section ("Page title / 3. Overall flow"). The page title appears
+  only after the `<h1>` has scrolled away, so it never shows twice. On a phone the bar shows the
+  section name only.
+- **Contents**: the shell builds the list from each `main section[id]` and its `<h2>`, so give
+  every section an `id` and an `<h2>`, and do not write a contents list in the page.
+  - At 1200 px and wider, the list is always on screen as a side column ("On this page").
+  - Below 1200 px, the **Contents** button opens it as a one-column dropdown. It closes on a
+    link, on Escape and on a click outside.
+  - Both lists mark the section that the reader is in.
+- **Display settings** (the "Aa" button) opens the theme switch (Auto / Light / Dark) and the
+  text size (A− / 100 % / A+). Readers set these once, so they do not stay in the bar.
 - The page's own header is `main > header`; style it with that selector, because the bar is a
-  `<header>` too.
+  `<header>` too. `<main>` sits inside `<div class="layout">` with the side list; keep that
+  wrapper.
 
 ### Light and dark
 
@@ -193,7 +203,7 @@ Chinese and English), and use the CJK font stack and line-height from the design
 ### Text size
 
 - Every font size, line height, padding and gap that should grow with the text is in `rem`
-  (16 px = 1 rem). The shell's A− / A / A+ buttons change one root value (`--scale`, 87.5 % to
+  (16 px = 1 rem). The shell's A− / A+ buttons change one root value (`--scale`, 87.5 % to
   150 %), so anything in px does not scale. Borders and hairlines stay in px.
 - SVG diagrams scale with their width, not with the text size. Keep SVG label sizes in SVG
   units, and make sure the text next to the diagram still lines up at 150 %.
@@ -206,7 +216,7 @@ Chinese and English), and use the CJK font stack and line-height from the design
 - The last item of `<main>` is a **Back to top** link (`href="#top"`, the page bar has
   `id="top"`), on desktop and on phone. It scrolls smoothly unless the reader asks for reduced
   motion, and it is hidden in print.
-- Multi-column grids become one column below 40 rem (`repeat(auto-fit, minmax(16rem, 1fr))`
+- Multi-column grids become one column below 40 rem (`repeat(auto-fit, minmax(min(16rem, 100%), 1fr))`
   does this by itself). A stepper of 5–7 cards becomes 2 columns, then 1.
 - Wide tables and SVGs sit in a `.scroll` wrapper (`overflow-x: auto`), followed by a
   `.scroll-hint` line ("Swipe sideways to see all of it."), which the shell shows only on
@@ -243,8 +253,10 @@ Chinese and English), and use the CJK font stack and line-height from the design
 - The "Based on" box names every source used and every related part that is not covered.
 - In every flow diagram, a reader can tell the order of the calls without reading the text.
   The numbers on the arrows match the numbered list, and each stepper stage names its arrows.
-- The contents menu lists every section, and each link lands on its heading below the bar.
-- The page has the theme switch and the text-size buttons, and both work. No hard-coded colour
+- The contents lists (side list and dropdown) show every section, each link lands on its
+  heading below the bar, and the bar names the right section at the top and at the end of the
+  page.
+- The "Aa" settings have the theme switch and the text size, and both work. No hard-coded colour
   is left (search the file for `#` colours outside the token blocks).
 - The page reads well in Light, in Dark, at 150 % text, and at 360 px wide. If a browser is
   available, take screenshots of these cases. Headless Chrome does not go below a 504 px

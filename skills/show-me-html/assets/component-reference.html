@@ -62,40 +62,83 @@ p { margin: 0; }
 .small { font-size: 0.875rem; line-height: 1.43; }
 :lang(zh) body, body:lang(zh) { line-height: 1.75; }
 
-/* ---------- Page bar: contents menu, page title, theme and text size ----------
-   Sticky on every screen. It slides up while the reader scrolls down and comes back when they
-   scroll up, so it never takes reading space for long. In px on purpose: the bar keeps one
-   size at every text size. */
-.doc-bar { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 90%, transparent);
-  backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); transition: transform .2s cubic-bezier(.4,0,.2,1); }
+/* ---------- Page bar and contents ----------
+   One slim sticky bar that tells the reader where they are: the page title (only after the h1
+   has scrolled away, so it never shows twice), the section they are in, and a reading-progress
+   line along its bottom edge. It slides up while the reader scrolls down and comes back when
+   they scroll up.
+   Contents: a dropdown below 1200 px; a fixed side list at 1200 px and wider, so a desktop reader
+   can jump without opening a menu. Theme and text size sit behind one "Aa" button: readers set
+   them once, so they do not take space in the bar.
+   In px on purpose: the bar and the side list keep one size at every text size. */
+.doc-bar { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line);
+  transition: transform .2s cubic-bezier(.4,0,.2,1); }
 .doc-bar.is-hidden:not(:focus-within) { transform: translateY(-100%); }
-.bar-inner { max-width: 1040px; margin: 0 auto; display: flex; align-items: center; gap: 8px; padding: 8px 16px; }
-.bar-title { flex: 1; min-width: 0; font: 700 14px/20px var(--font); color: var(--muted);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.doc-bar button { font: 700 14px/1 var(--font); min-width: 44px; min-height: 44px; padding: 0 10px;
-  border: 0; background: none; color: var(--text); cursor: pointer; }
-.doc-bar .nav-btn { display: inline-flex; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid var(--line);
-  border-radius: 8px; background: var(--surface); }
-.doc-bar .nav-btn[aria-expanded="true"] { background: var(--primary); border-color: var(--primary); color: var(--surface); }
-.settings { display: flex; flex-wrap: wrap; gap: 8px; }
-.settings .group { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
-.settings .group button + button { border-left: 1px solid var(--line); }
-.settings button[aria-pressed="true"] { background: var(--primary); color: var(--surface); }
-.doc-bar button:focus-visible, .nav-list a:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.bar-inner { position: relative; max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 8px; padding: 4px 16px; }
+.bar-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--primary);
+  transform-origin: 0 50%; transform: scaleX(0); }
+.doc-bar button { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font: 500 14px/20px var(--font); min-width: 44px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 8px;
+  background: none; color: var(--text); cursor: pointer; transition: background-color .15s cubic-bezier(0,0,.2,1); }
+.doc-bar button[aria-expanded="true"] { background: var(--primary-soft); color: var(--on-primary-soft); }
+.doc-bar button:focus-visible, .toc a:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.doc-bar button:disabled { opacity: .4; cursor: not-allowed; }
+.ico { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* Where the reader is: "Page title / Current section". */
+.bar-where { flex: 1; min-width: 0; margin: 0; display: flex; align-items: baseline; gap: 8px; font: 14px/20px var(--font);
+  white-space: nowrap; }
+.bar-title, .bar-section { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.bar-title { flex: 0 1 auto; font-weight: 700; color: var(--text); opacity: 0; transition: opacity .2s cubic-bezier(0,0,.2,1); }
+.bar-where.is-past-title .bar-title { opacity: 1; }
+.bar-where:not(.is-past-title) .bar-sep { visibility: hidden; }
+.bar-section { flex: 0 10 auto; color: var(--muted); }
+.bar-sep { color: var(--muted); }
+.bar-section:empty, .bar-where:has(.bar-section:empty) .bar-sep { display: none; }
+/* Dropdowns: contents on the left, display settings on the right. */
+.pop { position: absolute; top: calc(100% + 8px); z-index: 11; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; box-shadow: 0 12px 32px rgb(0 0 0 / .16); max-height: calc(100vh - 80px); overflow-y: auto;
+  animation: pop-in .25s cubic-bezier(0,0,.2,1); }
+.pop[hidden] { display: none; }
+@keyframes pop-in { from { opacity: 0; transform: translateY(-4px); } }
+.pop-contents { left: 16px; width: min(360px, calc(100vw - 32px)); padding: 8px; }
+.pop-settings { right: 16px; width: min(296px, calc(100vw - 32px)); padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.pop-label { font: 700 12px/16px var(--font); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 8px; }
+.seg { display: flex; align-items: center; padding: 4px; gap: 4px; border-radius: 12px; background: var(--surface-2); }
+.seg button { flex: 1; }
+.doc-bar .seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); font-weight: 700;
+  box-shadow: 0 1px 3px rgb(0 0 0 / .12); }
+.size-value { flex: 1; text-align: center; font: 700 14px/20px var(--font); font-variant-numeric: tabular-nums; }
+/* Contents list: one column, in reading order. The side list uses the same markup. */
+.toc { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.toc a { display: flex; align-items: center; min-height: 44px; padding: 8px 12px; border-radius: 8px;
+  color: var(--text); text-decoration: none; font: 14px/20px var(--font); transition: background-color .15s cubic-bezier(0,0,.2,1); }
+.toc a[aria-current="true"] { background: var(--primary-soft); color: var(--on-primary-soft); font-weight: 700; }
 @media (hover: hover) {
-  .settings button:hover:not([aria-pressed="true"]), .doc-bar .nav-btn:hover:not([aria-expanded="true"]),
-  .nav-list a:hover { background: var(--surface-2); }
+  .doc-bar button:hover:not([aria-expanded="true"]):not([aria-pressed="true"]):not(:disabled),
+  .toc a:hover:not([aria-current="true"]) { background: var(--surface-2); }
 }
-.nav-panel { max-width: 1040px; margin: 0 auto; padding: 0 16px 16px; display: flex; flex-direction: column; gap: 16px;
-  max-height: calc(100vh - 61px); overflow-y: auto; }
-.nav-panel[hidden] { display: none; }
-.nav-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px; }
-.nav-list a { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 8px;
-  color: var(--text); text-decoration: none; font: 14px/20px var(--font); }
-.nav-list a[aria-current="true"] { background: var(--primary-soft); color: var(--on-primary-soft); font-weight: 700; }
-.panel-settings:empty { display: none; }
-/* A section heading reached from the menu is not hidden under the bar. */
+/* Side list at 1200 px and wider. A line on its left marks the current section. */
+.toc-side { display: none; }
+@media (min-width: 1200px) {
+  .layout { display: grid; grid-template-columns: 224px minmax(0, 57.5rem); justify-content: center; gap: 48px; padding: 0 16px; }
+  .layout > main { margin: 0; padding-left: 0; padding-right: 0; }
+  .toc-side { display: block; position: sticky; top: 64px; align-self: start; max-height: calc(100vh - 64px);
+    overflow-y: auto; padding: 24px 0; }
+  .toc-side .pop-label { padding-left: 16px; }
+  .toc-side .toc { gap: 0; border-left: 1px solid var(--line); }
+  .toc-side .toc a { min-height: 36px; padding: 8px 12px 8px 16px; margin-left: -1px; border-radius: 0 8px 8px 0;
+    border-left: 2px solid transparent; color: var(--muted); }
+  .toc-side .toc a[aria-current="true"] { background: none; color: var(--primary); border-left-color: var(--primary); }
+  .doc-bar .nav-btn { display: none; }
+}
+/* A section heading reached from the contents is not hidden under the bar. */
 main [id] { scroll-margin-top: 72px; }
+/* Phone: the bar names only the current section, in full weight. */
+@media (max-width: 40rem) {
+  .bar-title, .bar-sep { display: none; }
+  .bar-section { color: var(--text); font-weight: 700; }
+}
 
 /* ---------- Phone width ---------- */
 .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -112,7 +155,7 @@ main > header { display: flex; flex-direction: column; gap: 0.75rem; }
 .lead { color: var(--muted); max-width: 70ch; }
 section { display: flex; flex-direction: column; gap: 1rem; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr)); gap: 1rem; }
 code { font-family: var(--mono); font-size: 0.875rem; background: var(--code-bg); padding: 0 0.25rem; border-radius: 0.25rem; overflow-wrap: anywhere; }
 .muted { color: var(--muted); }
 .tabular { font-variant-numeric: tabular-nums; }
@@ -213,33 +256,38 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
-@media print { .doc-bar, .to-top-wrap { display: none; } }
+@media print { .doc-bar, .toc-side, .to-top-wrap { display: none; } }
 </style>
 </head>
 <body>
 <header class="doc-bar" id="top">
   <div class="bar-inner">
-    <button type="button" class="nav-btn" aria-expanded="false" aria-controls="docNav"><span aria-hidden="true">☰</span><span>Contents</span></button>
-    <span class="bar-title" aria-hidden="true"></span>
-    <div class="settings" role="toolbar" aria-label="Page settings">
-      <div class="group" role="group" aria-label="Theme">
-        <button type="button" data-theme-btn="auto" aria-pressed="true" title="Follow the system">Auto</button>
-        <button type="button" data-theme-btn="light" aria-pressed="false">Light</button>
-        <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
-      </div>
-      <div class="group" role="group" aria-label="Text size">
-        <button type="button" data-scale-btn="-1" aria-label="Smaller text">A−</button>
-        <button type="button" data-scale-btn="0" aria-label="Default text size">A</button>
-        <button type="button" data-scale-btn="1" aria-label="Larger text">A+</button>
-      </div>
+    <button type="button" class="nav-btn" aria-expanded="false" aria-controls="docNav">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Contents</span></button>
+    <p class="bar-where" aria-hidden="true"><span class="bar-title"></span><span class="bar-sep">/</span><span class="bar-section"></span></p>
+    <button type="button" class="set-btn" aria-expanded="false" aria-controls="docSettings" aria-label="Display settings" title="Display settings">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 19 7.5 5h1L14 19M4.2 14h7.6M15 19l3.5-9h.5l3.5 9M16 16.5h5.5"/></svg></button>
+    <!-- Both contents lists are built from each main section[id] and its h2; do not write them by hand. -->
+    <nav class="pop pop-contents" id="docNav" aria-label="Contents" hidden><ol class="toc"></ol></nav>
+    <div class="pop pop-settings" id="docSettings" role="group" aria-label="Display settings" hidden>
+      <div><p class="pop-label" id="themeLabel">Theme</p>
+        <div class="seg" role="group" aria-labelledby="themeLabel">
+          <button type="button" data-theme-btn="auto" aria-pressed="true" title="Follow the system">Auto</button>
+          <button type="button" data-theme-btn="light" aria-pressed="false">Light</button>
+          <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+        </div></div>
+      <div><p class="pop-label" id="sizeLabel">Text size</p>
+        <div class="seg" role="group" aria-labelledby="sizeLabel">
+          <button type="button" data-scale-btn="-1" aria-label="Smaller text">A−</button>
+          <span class="size-value" aria-live="polite">100 %</span>
+          <button type="button" data-scale-btn="1" aria-label="Larger text">A+</button>
+        </div></div>
     </div>
   </div>
-  <!-- The list is built from each main section[id] and its h2; do not write it by hand. -->
-  <nav class="nav-panel" id="docNav" aria-label="Contents" hidden>
-    <ol class="nav-list"></ol>
-    <div class="panel-settings"></div>
-  </nav>
+  <div class="bar-progress" aria-hidden="true"></div>
 </header>
+<div class="layout">
+<aside class="toc-side"><nav aria-label="Contents"><p class="pop-label">On this page</p><ol class="toc"></ol></nav></aside>
 <main>
 <!--
   COMPONENT REFERENCE for the show-me-html skill.
@@ -248,7 +296,7 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
   The placeholder sentences are written in the target style (ASD-STE100): keep that style.
 -->
 
-<!-- COMPONENT: Header. Always. Pill label, title, 2-sentence lead, "Based on" box. The contents menu in the page bar is built from the sections; no TOC here. -->
+<!-- COMPONENT: Header. Always. Pill label, title, 2-sentence lead, "Based on" box. The shell builds the contents lists from the sections; no TOC here. -->
 <header>
   <span class="pill">Area · Topic</span>
   <h1>How [the subject] works</h1>
@@ -484,6 +532,7 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
 
 <div class="to-top-wrap"><a class="to-top" href="#top">↑ Back to top</a></div>
 </main>
+</div>
 <script>
 (() => {
   // ---------- Flow diagram: one spec, drawn for the overview and for the stepper ----------
@@ -673,73 +722,102 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
   });
   showTheme();
 
-  // Text size: five steps from 87.5 % to 150 %.
+  // Text size: five steps from 87.5 % to 150 %. The value between the buttons shows the step.
   var STEPS = [0.875, 1, 1.125, 1.25, 1.5];
+  var sizeBtns = document.querySelectorAll('[data-scale-btn]'), sizeOut = document.querySelector('.size-value');
   var scale = function () { return Number(getComputedStyle(d).getPropertyValue('--scale')) || 1; };
-  document.querySelectorAll('[data-scale-btn]').forEach(function (b) {
+  var showSize = function () {
+    var s = scale(), i = STEPS.indexOf(s);
+    sizeOut.textContent = Math.round(s * 1000) / 10 + ' %';
+    sizeBtns.forEach(function (b) {
+      b.disabled = (b.dataset.scaleBtn === '-1' && i === 0) || (b.dataset.scaleBtn === '1' && i === STEPS.length - 1);
+    });
+  };
+  sizeBtns.forEach(function (b) {
     b.addEventListener('click', function () {
-      var dir = Number(b.dataset.scaleBtn), i = STEPS.indexOf(scale());
+      var i = STEPS.indexOf(scale());
       if (i < 0) i = 1;
-      var next = dir === 0 ? 1 : STEPS[Math.min(STEPS.length - 1, Math.max(0, i + dir))];
+      var next = STEPS[Math.min(STEPS.length - 1, Math.max(0, i + Number(b.dataset.scaleBtn)))];
       d.style.setProperty('--scale', next);
       save('doc-scale', next === 1 ? null : next);
+      showSize();
     });
   });
+  showSize();
 
-  // Page bar. The contents menu lists every main section[id] by its h2.
-  var bar = document.querySelector('.doc-bar'), navBtn = bar.querySelector('.nav-btn');
-  var panel = document.getElementById('docNav'), list = panel.querySelector('.nav-list');
-  var settings = bar.querySelector('.settings'), h1 = document.querySelector('main h1');
+  // Page bar. Both contents lists (dropdown and side) list every main section[id] by its h2.
+  var bar = document.querySelector('.doc-bar'), side = document.querySelector('.toc-side');
+  var navBtn = bar.querySelector('.nav-btn'), setBtn = bar.querySelector('.set-btn');
+  var navPop = document.getElementById('docNav'), setPop = document.getElementById('docSettings');
+  var where = bar.querySelector('.bar-where'), whereSection = bar.querySelector('.bar-section');
+  var h1 = document.querySelector('main h1');
   if (h1) bar.querySelector('.bar-title').textContent = h1.textContent;
   var sections = Array.prototype.filter.call(document.querySelectorAll('main section[id]'),
     function (s) { return s.querySelector('h2'); });
-  var links = sections.map(function (s) {
-    var li = document.createElement('li'), a = document.createElement('a');
-    a.href = '#' + s.id; a.textContent = s.querySelector('h2').textContent;
-    li.append(a); list.append(li); return a;
+  var links = [];
+  document.querySelectorAll('.toc').forEach(function (list) {
+    sections.forEach(function (s) {
+      var li = document.createElement('li'), a = document.createElement('a');
+      a.href = '#' + s.id; a.textContent = s.querySelector('h2').textContent;
+      li.append(a); list.append(li); links.push(a);
+    });
   });
-  if (!links.length) navBtn.hidden = true;
-  var setOpen = function (open) {
-    navBtn.setAttribute('aria-expanded', String(open));
-    panel.hidden = !open;
-    if (open) bar.classList.remove('is-hidden');
+  if (!sections.length) { navBtn.hidden = true; side.hidden = true; }
+
+  // One dropdown is open at a time. While one is open, the bar stays on screen.
+  var pops = [[navBtn, navPop], [setBtn, setPop]];
+  var setOpen = function (btn, pop, open) {
+    btn.setAttribute('aria-expanded', String(open));
+    pop.hidden = !open;
+    if (!open) return;
+    bar.classList.remove('is-hidden');
+    pops.forEach(function (p) { if (p[1] !== pop) setOpen(p[0], p[1], false); });
+    var cur = pop.querySelector('[aria-current="true"]');
+    if (cur) cur.scrollIntoView({ block: 'nearest' });
   };
-  navBtn.addEventListener('click', function () { setOpen(panel.hidden); });
-  links.forEach(function (a) { a.addEventListener('click', function () { setOpen(false); }); });
+  var anyOpen = function () { return pops.some(function (p) { return !p[1].hidden; }); };
+  pops.forEach(function (p) { p[0].addEventListener('click', function () { setOpen(p[0], p[1], p[1].hidden); }); });
+  navPop.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(navBtn, navPop, false); });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !panel.hidden) { setOpen(false); navBtn.focus(); }
+    if (e.key !== 'Escape') return;
+    pops.forEach(function (p) { if (!p[1].hidden) { setOpen(p[0], p[1], false); p[0].focus(); } });
   });
-  document.addEventListener('click', function (e) { if (!panel.hidden && !bar.contains(e.target)) setOpen(false); });
+  document.addEventListener('click', function (e) {
+    if (!bar.contains(e.target)) pops.forEach(function (p) { setOpen(p[0], p[1], false); });
+  });
 
-  // On a phone the theme and size buttons move into the menu, so the bar keeps room for the title.
-  var mq = window.matchMedia('(max-width: 40rem)');
-  var placeSettings = function () {
-    (mq.matches ? panel.querySelector('.panel-settings') : bar.querySelector('.bar-inner')).append(settings);
+  // On every scroll (once per frame): hide or show the bar, move the progress line, show the
+  // title once the h1 is under the bar, and mark the current section. The current section is
+  // the last one whose top has passed a line 30 % down the screen.
+  var progress = bar.querySelector('.bar-progress'), lastY = window.scrollY, current, ticking = false;
+  var update = function () {
+    ticking = false;
+    var y = window.scrollY, max = d.scrollHeight - window.innerHeight;
+    progress.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, y / max) : 0) + ')';
+    if (Math.abs(y - lastY) >= 6) {
+      if (anyOpen() || y < 80 || y < lastY) bar.classList.remove('is-hidden');
+      else bar.classList.add('is-hidden');
+      lastY = y;
+    }
+    where.classList.toggle('is-past-title', !h1 || h1.getBoundingClientRect().bottom < 56);
+    // Over the last screen of the page the line moves down to the bottom edge, so the short
+    // sections at the end also become current.
+    var vh = window.innerHeight, left = Math.max(0, max - y), line = vh * 0.3, cur = null;
+    if (left < vh) line += (vh - line) * (1 - left / vh);
+    sections.forEach(function (s) { if (s.getBoundingClientRect().top <= line) cur = s; });
+    if (cur === current) return;
+    current = cur;
+    whereSection.textContent = cur ? cur.querySelector('h2').textContent : '';
+    links.forEach(function (a) { a.setAttribute('aria-current', String(!!cur && a.hash === '#' + cur.id)); });
+    var mark = side.querySelector('[aria-current="true"]');
+    if (mark && getComputedStyle(side).display !== 'none') {
+      var r = mark.getBoundingClientRect(), box = side.getBoundingClientRect();
+      if (r.top < box.top || r.bottom > box.bottom) side.scrollTop += r.top - box.top - box.height / 2;
+    }
   };
-  if (mq.addEventListener) mq.addEventListener('change', placeSettings); else mq.addListener(placeSettings);
-  placeSettings();
-
-  // The bar hides while the reader scrolls down and comes back when they scroll up.
-  // Decided on every scroll event (cheap), so a fast change of direction is never lost.
-  var lastY = window.scrollY;
-  window.addEventListener('scroll', function () {
-    var y = window.scrollY;
-    if (Math.abs(y - lastY) < 6) return;
-    if (!panel.hidden || y < 80 || y < lastY) bar.classList.remove('is-hidden');
-    else bar.classList.add('is-hidden');
-    lastY = y;
-  }, { passive: true });
-
-  // The menu marks the section that the reader is in.
-  if ('IntersectionObserver' in window && links.length) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (!en.isIntersecting) return;
-        links.forEach(function (a) { a.setAttribute('aria-current', String(a.hash === '#' + en.target.id)); });
-      });
-    }, { rootMargin: '-20% 0px -70% 0px' });
-    sections.forEach(function (s) { io.observe(s); });
-  }
+  window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  window.addEventListener('resize', update);
+  update();
 })();
 </script>
 </body>
