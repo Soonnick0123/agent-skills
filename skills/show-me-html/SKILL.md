@@ -162,6 +162,15 @@ repository defaults to English. For a Chinese page, follow section 8 of
 `references/ste100-rules.md` (character limits, no 被/進行, one term per thing, spacing between
 Chinese and English), and use the CJK font stack and line-height from the design rules.
 
+**The interface follows the page language too.** The shell and the components have built-in
+English strings: the page bar (Contents, PDF, Display settings, Theme, Text size), the side
+list, the PDF help, the stepper buttons, the callout labels, `aria-label` and `title`
+attributes, and the sentences that the scripts write ("Link copied", "Exported on …",
+"Arrows 3a 3b"). On a page that is not in English, translate every one of them with
+`references/ui-strings.md`. It lists each string, where it is, and its Traditional and
+Simplified Chinese text, with the browser's own names for the PDF steps. A Chinese page with
+an English "Contents" button reads as unfinished.
+
 ## 6. Visual design
 
 - **One self-contained file.** Inline CSS and JS. No CDN, no external fonts. It works offline.
@@ -297,5 +306,8 @@ browser gives a good PDF. Nothing outside the page is needed.
   card is cut across two pages, and the page is light.
 - An interactive demo gives the same answer as the real rule at the edges (on the boundary,
   just before, just after, several periods later).
+- On a page that is not in English, no English interface string is left. Search the file
+  for each English string in `references/ui-strings.md` (also inside `aria-label`, `title`
+  and the scripts), and open the contents menu, the "Aa" settings and the PDF help to look.
 - Run the STE self-check in `references/ste100-rules.md`.
 - Every term in the text is in the Terms table, with no synonyms.
