@@ -17,6 +17,26 @@ a how-it-works explainer, handbook, runbook, decision record, or a summary of a 
 - **Reader controls**: light / dark / auto theme, text size from 87.5 % to 150 %, phone layout,
   back to top. No external files: the page works offline.
 
+### What a page looks like
+
+These screenshots come from [`demo/price-lookup-demo.html`](demo/price-lookup-demo.html), a
+demo page about a made-up price API. Download the file and open it in a browser to try the
+animations, the stepper and the slider.
+
+**Header**: title, lead, the "Based on" box and the contents.
+
+![Header of a generated page in light mode](docs/screenshots/header-light.png)
+
+**Flow diagram**: numbered arrows in call order. A dot runs the calls one after another; dashed
+arrows occur only sometimes.
+
+![Flow diagram with numbered arrows](docs/screenshots/flow-diagram.png)
+
+**Phone, dark mode**: the stepper highlights the parts of the selected stage, and the slider
+shows the result of the rule live.
+
+![Stepper and rule demo on a phone in dark mode](docs/screenshots/phone-dark.png)
+
 ### Install
 
 ```sh
