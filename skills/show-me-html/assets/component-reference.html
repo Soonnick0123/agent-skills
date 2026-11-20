@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Component Reference</title>
+<script>
+  // Applies the saved theme and text size before the first paint, so the page does not flash.
+  (function () {
+    var d = document.documentElement;
+    try {
+      var t = localStorage.getItem('doc-theme');
+      if (t === 'light' || t === 'dark') d.setAttribute('data-theme', t);
+      var s = Number(localStorage.getItem('doc-scale'));
+      if (s >= 0.875 && s <= 1.5) d.style.setProperty('--scale', s);
+    } catch (e) { /* storage blocked: defaults apply */ }
+  })();
+</script>
+<style>
+/* ---------- Tokens: light, then dark for "auto" and for an explicit choice ---------- */
+:root {
+  --scale: 1;
+  --bg: #fbf8ff; --surface: #ffffff; --surface-2: #f3eefc; --line: #e4ddf2;
+  --text: #1c1a22; --muted: #5d5868; --primary: #6750a4; --primary-soft: #e9ddff;
+  --on-primary-soft: #4f378b; --warn: #8a5300; --warn-soft: #ffe2bd; --err: #b3261e;
+  --err-soft: #f9dedc; --ok: #1f6b3a; --ok-soft: #d4f1dc; --code-bg: #f1ecf9;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+          "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141218; --surface: #1d1b22; --surface-2: #26232d; --line: #38343f;
+    --text: #e8e3ee; --muted: #b0a9bb; --primary: #cfbcff; --primary-soft: #3b2f5c;
+    --on-primary-soft: #e9ddff; --warn: #ffb95c; --warn-soft: #4a3214; --err: #f2b8b5;
+    --err-soft: #5a1d19; --ok: #8fd9a6; --ok-soft: #1b3d26; --code-bg: #2a2632;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141218; --surface: #1d1b22; --surface-2: #26232d; --line: #38343f;
+  --text: #e8e3ee; --muted: #b0a9bb; --primary: #cfbcff; --primary-soft: #3b2f5c;
+  --on-primary-soft: #e9ddff; --warn: #ffb95c; --warn-soft: #4a3214; --err: #f2b8b5;
+  --err-soft: #5a1d19; --ok: #8fd9a6; --ok-soft: #1b3d26; --code-bg: #2a2632;
+  color-scheme: dark;
+}
+
+/* ---------- Text size: every text size is in rem, so one root value scales the page ---------- */
+html { font-size: calc(100% * var(--scale)); -webkit-text-size-adjust: 100%; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 1rem/1.5 var(--font); font-synthesis: none; overflow-wrap: anywhere; }
+main { max-width: 57.5rem; margin: 0 auto; padding: 1.5rem 1rem 6rem; display: flex; flex-direction: column; gap: 3rem; }
+/* Flex and grid children may shrink below their content, so a wide table scrolls inside its
+   .scroll wrapper instead of widening the whole page. */
+main > *, main section > *, .card > * { min-width: 0; }
+h1 { font-size: 2rem; line-height: 1.25; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.5rem; line-height: 1.33; margin: 0; font-weight: 700; }
+h3 { font-size: 1.125rem; line-height: 1.55; margin: 0; font-weight: 700; }
+p { margin: 0; }
+.small { font-size: 0.875rem; line-height: 1.43; }
+:lang(zh) body, body:lang(zh) { line-height: 1.75; }
+
+/* ---------- Page controls (theme and text size) ----------
+   In px on purpose: the controls keep one size, so they never push themselves off screen
+   when the reader makes the text larger. */
+.doc-controls { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end;
+  padding: 8px 16px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line); }
+.doc-controls .group { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.doc-controls button { font: 700 14px/1 var(--font); min-width: 44px; min-height: 44px; padding: 0 10px;
+  border: 0; background: none; color: var(--text); cursor: pointer; }
+.doc-controls button + button { border-left: 1px solid var(--line); }
+.doc-controls button[aria-pressed="true"] { background: var(--primary); color: var(--surface); }
+.doc-controls button:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+@media (hover: hover) { .doc-controls button:hover:not([aria-pressed="true"]) { background: var(--surface-2); } }
+
+/* ---------- Phone width ---------- */
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.scroll-hint { display: none; }
+@media (max-width: 40rem) {
+  .doc-controls { position: static; }  /* more room to read on a phone */
+  main { gap: 2rem; }
+  h1 { font-size: 1.625rem; }
+  h2 { font-size: 1.25rem; }
+  .scroll-hint { display: block; font-size: 0.75rem; color: var(--muted); }
+}
+
+/* ---------- Document components (rem, so they follow the text-size buttons) ---------- */
+header { display: flex; flex-direction: column; gap: 0.75rem; }
+.lead { color: var(--muted); max-width: 70ch; }
+section { display: flex; flex-direction: column; gap: 1rem; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
+code { font-family: var(--mono); font-size: 0.875rem; background: var(--code-bg); padding: 0 0.25rem; border-radius: 0.25rem; overflow-wrap: anywhere; }
+.muted { color: var(--muted); }
+.tabular { font-variant-numeric: tabular-nums; }
+.pill { align-self: flex-start; display: inline-block; font-size: 0.75rem; line-height: 1rem; font-weight: 700; padding: 0.25rem 0.5rem; border-radius: 9999px; background: var(--primary-soft); color: var(--on-primary-soft); white-space: nowrap; }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.err { background: var(--err-soft); color: var(--err); }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+ul, ol { margin: 0; padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+table { width: 100%; border-collapse: collapse; font-size: 0.875rem; line-height: 1.25rem; }
+th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 700; }
+.callout { border-radius: 0.75rem; padding: 1rem; background: var(--primary-soft); color: var(--on-primary-soft); display: flex; flex-direction: column; gap: 0.5rem; }
+.callout.warn { background: var(--warn-soft); color: var(--warn); }
+.callout.neutral { background: var(--surface-2); color: var(--text); }
+.callout .label { font-size: 0.75rem; line-height: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.toc { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.toc a { font-size: 0.875rem; line-height: 1.25rem; color: var(--primary); text-decoration: none; padding: 0.25rem 0.75rem; border-radius: 9999px; border: 1px solid var(--line); background: var(--surface); }
+@media (hover: hover) { .toc a:hover { background: var(--surface-2); } }
+button { font: 700 0.875rem/1.25rem var(--font); min-height: 2.75rem; padding: 0 1rem; border-radius: 0.5rem; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; }
+@media (hover: hover) { button:hover { background: var(--surface-2); } }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+button.primary { background: var(--primary); color: var(--surface); border-color: var(--primary); }
+.controls { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+@media (max-width: 40rem) { .card { padding: 1rem; } }
+
+/* Numbered flow diagram, drawn by JS from one spec (FLOW) for the overview and the stepper. */
+svg text { font-family: var(--font); fill: var(--text); }
+.dg .node rect { fill: var(--surface-2); stroke: var(--line); }
+.dg .node.store rect { fill: var(--surface); }
+.dg .node.opt rect { stroke-dasharray: 6 4; stroke: var(--muted); }
+.dg .node .t { font-size: 15px; font-weight: 700; }
+.dg .node .s { font-size: 12px; fill: var(--muted); }
+.dg .wlabel { font-size: 12px; fill: var(--muted); }
+.dg .node, .dg .edge { transition: opacity .2s cubic-bezier(0,0,.2,1); }
+.dg .edge path { stroke: var(--muted); stroke-width: 1.5; fill: none; transition: stroke .15s; }
+.dg .edge.opt path { stroke-dasharray: 6 4; }
+.dg .edge .badge circle { fill: var(--surface); stroke: var(--muted); stroke-width: 1.5; }
+.dg .edge .badge text { font-size: 11px; font-weight: 700; fill: var(--text); }
+.dg .edge.cur path { stroke: var(--primary); stroke-width: 2.5; }
+.dg .edge.cur.opt path { stroke: var(--warn); }
+.dg .edge.cur .badge circle { fill: var(--primary); stroke: var(--primary); }
+.dg .edge.cur.opt .badge circle { fill: var(--warn); stroke: var(--warn); }
+.dg .edge.cur .badge text { fill: var(--surface); }
+.dg .edge.cur .wlabel { fill: var(--text); font-weight: 700; }
+.dg .node.on rect { fill: var(--primary-soft); stroke: var(--primary); }
+.dg .dim { opacity: .25; }
+.dg .dot { fill: var(--primary); }
+.dg .dot.opt { fill: var(--warn); }
+.order { list-style: none; padding: 0; }
+.order li { position: relative; padding-left: 2.25rem; }
+.order .num { position: absolute; left: 0; top: -1px; width: 1.625rem; height: 1.375rem; border-radius: 9999px; background: var(--primary-soft); color: var(--on-primary-soft); font-size: 0.75rem; line-height: 1.375rem; font-weight: 700; text-align: center; }
+.order .num.opt { background: var(--warn-soft); color: var(--warn); }
+
+/* Stepper */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+.step { border-radius: 0.75rem; padding: 0.75rem; background: var(--surface-2); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 0.25rem; transition: background-color .2s, border-color .2s; min-width: 0; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.step .n { font-size: 0.75rem; line-height: 1rem; color: var(--muted); font-weight: 700; }
+.step .h { font-size: 0.875rem; line-height: 1.25rem; font-weight: 700; }
+.step .d { font-size: 0.75rem; line-height: 1rem; color: var(--muted); font-weight: 400; }
+.step[aria-current="step"] { background: var(--primary-soft); border-color: var(--primary); }
+.step[aria-current="step"] .n, .step[aria-current="step"] .d { color: var(--on-primary-soft); }
+.bar { height: 0.25rem; border-radius: 9999px; background: var(--line); overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 100%; background: var(--primary); transform-origin: left; transform: scaleX(0); transition: transform .3s cubic-bezier(.4,0,.2,1); }
+@media (max-width: 40rem) { .steps { grid-template-columns: repeat(2, 1fr); } }
+
+/* Interactive demo */
+.track { position: relative; height: 2.5rem; }
+.track .axis { position: absolute; left: 0; right: 0; top: 1.125rem; height: 0.25rem; border-radius: 9999px; background: var(--ok-soft); }
+.track .band { position: absolute; top: 1.125rem; height: 0.25rem; }
+.track .band.warn { background: var(--warn); opacity: .5; }
+.track .band.err { background: var(--err); opacity: .5; right: 0; }
+.track .mark { position: absolute; top: 0.375rem; width: 2px; height: 1.75rem; background: var(--muted); }
+input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primary); }
+.result { border-radius: 0.75rem; padding: 1rem; display: flex; gap: 0.75rem; align-items: flex-start; }
+.result .icon { width: 2rem; height: 2rem; border-radius: 9999px; flex: none; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--surface); }
+.result.ok { background: var(--ok-soft); color: var(--ok); } .result.ok .icon { background: var(--ok); }
+.result.warn { background: var(--warn-soft); color: var(--warn); } .result.warn .icon { background: var(--warn); }
+.result.err { background: var(--err-soft); color: var(--err); } .result.err .icon { background: var(--err); }
+
+/* UI state previews */
+.panel { border-radius: 0.75rem; padding: 0.75rem; display: flex; gap: 0.75rem; align-items: flex-start; background: color-mix(in srgb, var(--primary-soft) 40%, var(--surface)); }
+.panel.warn { background: color-mix(in srgb, var(--warn-soft) 40%, var(--surface)); }
+.panel.err { background: color-mix(in srgb, var(--err-soft) 40%, var(--surface)); }
+.panel .ic { width: 2rem; height: 2rem; border-radius: 9999px; flex: none; display: flex; align-items: center; justify-content: center; background: var(--primary-soft); color: var(--on-primary-soft); }
+.panel.warn .ic { background: var(--warn-soft); color: var(--warn); }
+.panel.err .ic { background: var(--err-soft); color: var(--err); }
+.panel .hd { font-size: 0.875rem; line-height: 1.25rem; font-weight: 700; }
+.panel .cp { font-size: 0.75rem; line-height: 1rem; color: var(--muted); }
+.spin { display: inline-block; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Back to top (end of the page, desktop and phone) ---------- */
+.to-top-wrap { display: flex; justify-content: center; }
+.to-top { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; padding: 0 1rem;
+  border: 1px solid var(--line); border-radius: 0.5rem; background: var(--surface); color: var(--primary);
+  font-weight: 700; font-size: 0.875rem; text-decoration: none; }
+@media (hover: hover) { .to-top:hover { background: var(--surface-2); } }
+.to-top:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+@media print { .doc-controls, .to-top-wrap { display: none; } }
+</style>
+</head>
+<body>
+<div class="doc-controls" id="top" role="toolbar" aria-label="Page settings">
+  <div class="group" role="group" aria-label="Theme">
+    <button type="button" data-theme-btn="auto" aria-pressed="true" title="Follow the system">Auto</button>
+    <button type="button" data-theme-btn="light" aria-pressed="false">Light</button>
+    <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+  </div>
+  <div class="group" role="group" aria-label="Text size">
+    <button type="button" data-scale-btn="-1" aria-label="Smaller text">A−</button>
+    <button type="button" data-scale-btn="0" aria-label="Default text size">A</button>
+    <button type="button" data-scale-btn="1" aria-label="Larger text">A+</button>
+  </div>
+</div>
+<main>
+<!--
+  COMPONENT REFERENCE for the show-me-html skill.
+  Every block below is a reusable component with placeholder text. Copy only the components
+  that the document needs, replace the placeholders with real facts, and delete the rest.
+  The placeholder sentences are written in the target style (ASD-STE100): keep that style.
+-->
+
+<!-- COMPONENT: Header. Always. Pill label, title, 2-sentence lead, "Based on" box, TOC. -->
+<header>
+  <span class="pill">Area · Topic</span>
+  <h1>How [the subject] works</h1>
+  <p class="lead">This page tells you how [the subject] works. It also tells you what to do when [the main exception] occurs.</p>
+  <!-- COMPONENT: "Based on" box. Always. Sources, what is not covered, how it was checked. -->
+  <div class="callout neutral small">
+    <span class="label">Based on</span>
+    <ul>
+      <li>[Source 1, with a version: repository and commit, file, or conversation date.]</li>
+      <li>[A related part that this page does not cover, and why.]</li>
+      <li>[How the facts were checked, for example: Not tested on a real system.]</li>
+    </ul>
+  </div>
+  <nav class="toc" aria-label="Contents">
+    <a href="#key-points">1. Key points</a><a href="#terms">2. Terms</a><a href="#flow">3. Overall flow</a>
+    <a href="#procedures">4. Procedures</a><a href="#lifecycle">5. Lifecycle</a><a href="#demo">6. The rule</a>
+    <a href="#states">7. States</a><a href="#conditions">8. Conditions</a><a href="#options">9. Options</a>
+    <a href="#decisions">10. Decisions</a><a href="#open">11. Open items</a><a href="#sources">12. Sources</a>
+  </nav>
+</header>
+
+<!-- COMPONENT: Key points. Handbook, summary, decision record. 3 to 6 bullets. -->
+<section id="key-points">
+  <h2>1. Key points</h2>
+  <ul>
+    <li>[The most important fact. One idea in one sentence.]</li>
+    <li>[The second fact.]</li>
+    <li>[The thing that readers most often get wrong.]</li>
+  </ul>
+</section>
+
+<!-- COMPONENT: Terms. One meaning per term; the page uses no other name for the same thing. -->
+<section id="terms">
+  <h2>2. Terms</h2>
+  <p>This page uses each term below with one meaning only.</p>
+  <div class="scroll card">
+    <table>
+      <thead><tr><th>Term</th><th>Meaning</th><th>In the code</th></tr></thead>
+      <tbody>
+        <tr><td><b>Client</b></td><td>[The program or person that starts the action.]</td><td><code>[Name]</code></td></tr>
+        <tr><td><b>Gateway</b></td><td>[The part that receives the request first.]</td><td><code>[Name]</code></td></tr>
+        <tr><td><b>Service</b></td><td>[The part that does the work.]</td><td><code>[Name]</code></td></tr>
+        <tr><td><b>Cache</b></td><td>[A fast copy of the data.]</td><td><code>[Name]</code></td></tr>
+        <tr><td><b>Database</b></td><td>[The permanent store of the data.]</td><td><code>[Name]</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- COMPONENT: Overview diagram with numbered arrows. Edit FLOW in the script, not the SVG.
+     Numbers give the call order; 3a/3b are alternatives; dashed = only sometimes. -->
+<section id="flow">
+  <h2>3. Overall flow</h2>
+  <div class="card">
+    <div class="scroll">
+      <svg class="dg" id="flowSvg" viewBox="0 0 920 380" width="100%" style="min-width:40rem" role="img"
+        aria-label="[Say the flow in words, in order. 1: the client sends a request to the gateway. 2: … ]"></svg>
+    </div>
+    <p class="scroll-hint">Swipe sideways to see all of it.</p>
+    <div class="grid2 small">
+      <div><span class="pill">The order of the calls</span>
+        <ol class="order" style="margin-top:0.5rem">
+          <li><span class="num">1</span>The client sends the request to the gateway.</li>
+          <li><span class="num">2</span>The gateway sends the request to the service.</li>
+          <li><span class="num">3a</span>The service reads the cache.</li>
+          <li><span class="num">4</span>The service returns the result to the gateway.</li>
+          <li><span class="num">5</span>The gateway returns the response to the client.</li>
+        </ol>
+      </div>
+      <div><span class="pill warn">Only sometimes (dashed)</span>
+        <ol class="order" style="margin-top:0.5rem">
+          <li><span class="num opt">3b</span>The service reads the database only when the cache has no copy.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPONENT: Procedures. "Before you start" box, one card per task, "Cautions" box. -->
+<section id="procedures">
+  <h2>4. Procedures</h2>
+  <div class="callout">
+    <span class="label">Before you start</span>
+    <ul class="small">
+      <li>[A condition that must be true before step 1.]</li>
+      <li>[A permission or a tool that the reader needs.]</li>
+    </ul>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>To [do task A]</h3>
+      <ol class="small">
+        <li>Open [the page or the tool].</li>
+        <li>Click <b>[Button label]</b>.</li>
+        <li>Make sure that [the visible result] occurs.</li>
+      </ol>
+      <p class="small muted">[The result of the procedure, in one or two sentences.]</p>
+    </div>
+    <div class="card">
+      <h3>To [do task B]</h3>
+      <ol class="small">
+        <li>[One action per step, verb first, 20 words or fewer.]</li>
+        <li>[The next action.]</li>
+      </ol>
+    </div>
+  </div>
+  <div class="callout warn">
+    <span class="label">Cautions</span>
+    <ul class="small">
+      <li>[An action that can cause data loss or downtime, and its effect.]</li>
+    </ul>
+  </div>
+</section>
+
+<!-- COMPONENT: Lifecycle stepper paired with the same diagram. Edit STAGES in the script.
+     Each stage card names the arrows it uses. -->
+<section id="lifecycle">
+  <h2>5. Lifecycle</h2>
+  <div class="card stepper">
+    <div class="steps" role="list"></div>
+    <div class="bar"><i></i></div>
+    <div class="scroll">
+      <svg class="dg" id="stepSvg" viewBox="0 0 920 380" width="100%" style="min-width:40rem" role="img"
+        aria-label="The flow diagram from section 3. The parts and arrows of the selected stage are highlighted."></svg>
+    </div>
+    <ul class="small stage-text" aria-live="polite"></ul>
+    <div class="controls">
+      <button type="button" data-act="back">Back</button>
+      <button type="button" class="primary" data-act="next">Next</button>
+      <button type="button" data-act="play">Play</button>
+    </div>
+  </div>
+</section>
+
+<!-- COMPONENT: Interactive demo of the one rule that readers get wrong. The JS must use the
+     same formula as the real code; name the real function in a comment. -->
+<section id="demo">
+  <h2>6. The rule</h2>
+  <div class="callout">
+    <span class="label">Rule</span>
+    <ul>
+      <li>Below [the warning value], [the system] works normally.</li>
+      <li>From [the warning value], [the system] shows a warning.</li>
+      <li>From [the limit], [the system] stops [the action].</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Try it: move the value</h3>
+    <div class="track" aria-hidden="true">
+      <div class="axis"></div><div class="band warn" id="bandWarn"></div><div class="band err" id="bandErr"></div>
+      <div class="mark" id="markWarn"></div><div class="mark" id="markLimit"></div>
+    </div>
+    <input type="range" id="demoValue" min="0" max="100" value="40" aria-label="Value">
+    <div class="result" id="demoResult" aria-live="polite"><span class="icon" id="demoIcon"></span><div><div style="font-weight:700" id="demoHead"></div><div class="small tabular" id="demoBody"></div></div></div>
+  </div>
+</section>
+
+<!-- COMPONENT: UI state previews. Rebuild the real UI with the real strings; no screenshots. -->
+<section id="states">
+  <h2>7. States</h2>
+  <div class="grid2">
+    <div class="panel"><span class="ic">✓</span><div><div class="hd">[Heading of the normal state]</div><div class="cp">[Caption, exactly as the product shows it]</div></div></div>
+    <div class="panel"><span class="ic"><span class="spin">◌</span></span><div><div class="hd">[Heading of a busy state]…</div><div class="cp">[Caption]</div></div></div>
+    <div class="panel warn"><span class="ic">!</span><div><div class="hd">[Heading of a warning state]</div><div class="cp">[Caption]</div></div></div>
+    <div class="panel err"><span class="ic">⚠</span><div><div class="hd">[Heading of an error state]</div><div class="cp">[Caption]</div></div></div>
+  </div>
+</section>
+
+<!-- COMPONENT: Condition → result table. One condition and one result per row; pill = word + colour. -->
+<section id="conditions">
+  <h2>8. Conditions and results</h2>
+  <div class="scroll card">
+    <table>
+      <thead><tr><th>Condition</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>[The data changes.]</td><td><span class="pill ok">Cleared</span> [What happens then.]</td></tr>
+        <tr><td>[The system restarts.]</td><td><span class="pill">No change</span> [What stays the same.]</td></tr>
+        <tr><td>[A newer version arrives first.]</td><td><span class="pill warn">Kept</span> [What carries over.]</td></tr>
+        <tr><td>[The input is not valid.]</td><td><span class="pill err">Error 400</span> [The message that the reader sees.]</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- COMPONENT: Options compared. Decision record; trade-offs side by side, status in the last row. -->
+<section id="options">
+  <h2>9. Options</h2>
+  <div class="scroll card">
+    <table>
+      <thead><tr><th>Item</th><th>Option A</th><th>Option B</th></tr></thead>
+      <tbody>
+        <tr><td>[Criterion 1]</td><td>[How A does it]</td><td>[How B does it]</td></tr>
+        <tr><td>[Criterion 2]</td><td>[…]</td><td>[…]</td></tr>
+        <tr><td>Status</td><td><span class="pill ok">Chosen</span></td><td><span class="pill">Rejected</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- COMPONENT: Decisions. Conversation summary or decision record. Say who decided. -->
+<section id="decisions">
+  <h2>10. Decisions</h2>
+  <div class="scroll card">
+    <table>
+      <thead><tr><th>Decision</th><th>Reason</th><th>By</th></tr></thead>
+      <tbody>
+        <tr><td>[What was decided.]</td><td>[Why, in one sentence.]</td><td>[The user / the reviewer / Claude's proposal]</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- COMPONENT: Open items, known limits, next steps. -->
+<section id="open">
+  <h2>11. Open items</h2>
+  <div class="scroll card">
+    <table>
+      <thead><tr><th>Item</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>[A question that nobody has answered yet.]</td><td><span class="pill warn">Open</span></td></tr>
+        <tr><td>[A known limit that the team accepted.]</td><td><span class="pill">Accepted</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- COMPONENT: Sources. The detailed list behind the "Based on" box. -->
+<section id="sources">
+  <h2>12. Sources</h2>
+  <div class="scroll card">
+    <table>
+      <thead><tr><th>Content</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>[What this source supports]</td><td><code>[path/to/file.ext]</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="to-top-wrap"><a class="to-top" href="#top">↑ Back to top</a></div>
+</main>
+<script>
+(() => {
+  // ---------- Flow diagram: one spec, drawn for the overview and for the stepper ----------
+  // Edit NODES and EDGES. Edge ids are the call order; `opt` = only sometimes (dashed, orange).
+  const NS = 'http://www.w3.org/2000/svg';
+  const NODES = {
+    client: { x: 20, y: 30, w: 150, h: 100, t: 'Client', s: '[Short role]' },
+    gateway: { x: 300, y: 30, w: 160, h: 100, t: 'Gateway', s: '[Short role]' },
+    service: { x: 300, y: 230, w: 160, h: 130, t: 'Service', s: '[Short role]' },
+    cache: { x: 620, y: 238, w: 190, h: 44, t: 'Cache', store: true },
+    db: { x: 620, y: 298, w: 190, h: 44, t: 'Database', store: true, opt: true },
+  };
+  const EDGES = [
+    { id: '1', d: 'M170 66 H297', b: [233, 66], l: ['request', 233, 48, 'middle'] },
+    { id: '2', d: 'M350 130 V227', b: [350, 178], l: ['check', 334, 182, 'end'] },
+    { id: '3a', d: 'M460 260 H617', b: [538, 260], l: ['read', 538, 244, 'middle'] },
+    { id: '3b', d: 'M460 320 H617', b: [538, 320], l: ['on a cache miss', 538, 304, 'middle'], opt: true },
+    { id: '4', d: 'M410 230 V133', b: [410, 182], l: ['result', 426, 186, 'start'] },
+    { id: '5', d: 'M300 108 H173', b: [237, 108], l: ['response', 237, 136, 'middle'] },
+  ];
+  // Stepper stages: the parts and the arrows that act in each stage, in order.
+  const STAGES = [
+    { t: 'Send', n: ['client', 'gateway'], e: ['1'], p: ['The client sends the request.', 'The gateway receives it.'] },
+    { t: 'Check', n: ['gateway', 'service'], e: ['2'], p: ['The gateway sends the request to the service.', 'The gateway waits for the result.'] },
+    { t: 'Read', n: ['service', 'cache', 'db'], e: ['3a', '3b'], p: ['The service reads the cache.', 'On a cache miss, the service reads the database.'] },
+    { t: 'Reply', n: ['service', 'gateway', 'client'], e: ['4', '5'], p: ['The service returns the result.', 'The gateway returns the response to the client.'] },
+  ];
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const el = (tag, attrs, parent) => {
+    const n = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    if (parent) parent.append(n);
+    return n;
+  };
+  const txt = (parent, cls, x, y, s, anchor = 'middle') => {
+    const t = el('text', { class: cls, x, y, 'text-anchor': anchor }, parent); t.textContent = s; return t;
+  };
+  const draw = (svg, uid) => {
+    const defs = el('defs', {}, svg);
+    for (const [name, color] of [['m', 'var(--muted)'], ['p', 'var(--primary)'], ['w', 'var(--warn)']]) {
+      const mk = el('marker', { id: `${uid}-${name}`, viewBox: '0 0 8 8', refX: 8, refY: 4, markerWidth: 8, markerHeight: 8, markerUnits: 'userSpaceOnUse', orient: 'auto' }, defs);
+      el('path', { d: 'M0 0 L8 4 L0 8 z', style: `fill:${color}` }, mk);
+    }
+    const m = { uid, nodes: {}, edges: {}, raf: 0 };
+    for (const [id, n] of Object.entries(NODES)) {
+      const g = el('g', { class: `node${n.store ? ' store' : ''}${n.opt ? ' opt' : ''}` }, svg);
+      el('rect', { x: n.x, y: n.y, width: n.w, height: n.h, rx: n.store ? 10 : 12 }, g);
+      const cx = n.x + n.w / 2;
+      if (n.store) txt(g, 't', cx, n.y + n.h / 2 + 5, n.t);
+      else { txt(g, 't', cx, n.y + n.h / 2 - 2, n.t); txt(g, 's', cx, n.y + n.h / 2 + 18, n.s); }
+      m.nodes[id] = g;
+    }
+    // The dot is drawn before the edges, so it passes under the number badges.
+    m.dot = el('circle', { class: 'dot', r: 6, cx: -20, cy: -20 }, svg);
+    for (const e of EDGES) {
+      const g = el('g', { class: `edge${e.opt ? ' opt' : ''}` }, svg);
+      const path = el('path', { d: e.d, 'marker-end': `url(#${uid}-m)` }, g);
+      txt(g, 'wlabel', e.l[1], e.l[2], e.l[0], e.l[3]);
+      const b = el('g', { class: 'badge' }, g);
+      el('circle', { cx: e.b[0], cy: e.b[1], r: 10 }, b);
+      txt(b, '', e.b[0], e.b[1] + 4, e.id);
+      m.edges[e.id] = { g, path, opt: !!e.opt };
+    }
+    return m;
+  };
+  const setCur = (m, id, on) => {
+    const e = m.edges[id];
+    e.g.classList.toggle('cur', on);
+    e.path.setAttribute('marker-end', `url(#${m.uid}-${on ? (e.opt ? 'w' : 'p') : 'm'})`);
+  };
+  // Moves one dot along the edges one after another, in a loop. `solo`: only the edge with the
+  // dot is highlighted (overview); otherwise all the given edges stay highlighted (stepper).
+  const run = (m, ids, solo) => {
+    cancelAnimationFrame(m.raf);
+    Object.keys(m.edges).forEach((id) => setCur(m, id, !solo && ids.includes(id)));
+    m.dot.style.opacity = 0;
+    if (!ids.length) return;
+    if (reduceMotion) { ids.forEach((id) => setCur(m, id, true)); return; }
+    const DUR = 900, GAP = 250, PAUSE = 900;
+    let i = 0, start = null;
+    const frame = (ts) => {
+      if (start === null) { start = ts; if (solo) Object.keys(m.edges).forEach((id) => setCur(m, id, id === ids[i])); }
+      const e = m.edges[ids[i]], t = (ts - start) / DUR;
+      if (t <= 1) {
+        const k = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const p = e.path.getPointAtLength(e.path.getTotalLength() * k);
+        m.dot.setAttribute('cx', p.x); m.dot.setAttribute('cy', p.y);
+        m.dot.classList.toggle('opt', e.opt);
+        m.dot.style.opacity = 1;
+      } else {
+        m.dot.style.opacity = 0;
+        if (ts - start > DUR + (i === ids.length - 1 ? PAUSE : GAP)) { i = (i + 1) % ids.length; start = null; }
+      }
+      m.raf = requestAnimationFrame(frame);
+    };
+    m.raf = requestAnimationFrame(frame);
+  };
+
+  run(draw(document.getElementById('flowSvg'), 'f'), EDGES.map((e) => e.id), true);
+
+  // ---------- Stepper ----------
+  const root = document.querySelector('.stepper');
+  const list = root.querySelector('.steps'), bar = root.querySelector('.bar i'), text = root.querySelector('.stage-text');
+  const stepDg = draw(document.getElementById('stepSvg'), 's');
+  const cards = STAGES.map((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'step'; b.setAttribute('role', 'listitem');
+    const arrows = s.e.length ? `arrow${s.e.length > 1 ? 's' : ''} ${s.e.join(' ')}` : 'no arrow';
+    b.innerHTML = `<span class="n">${i + 1} · ${arrows}</span><span class="h"></span><span class="d"></span>`;
+    b.querySelector('.h').textContent = s.t; b.querySelector('.d').textContent = s.p[0];
+    b.onclick = () => { stop(); show(i); };
+    list.append(b); return b;
+  });
+  let cur = 0, timer = null;
+  const show = (i) => {
+    cur = (i + STAGES.length) % STAGES.length;
+    const st = STAGES[cur];
+    cards.forEach((c, k) => k === cur ? c.setAttribute('aria-current', 'step') : c.removeAttribute('aria-current'));
+    bar.style.transform = `scaleX(${(cur + 1) / STAGES.length})`;
+    text.replaceChildren(...st.p.map((t) => Object.assign(document.createElement('li'), { textContent: t })));
+    for (const [id, g] of Object.entries(stepDg.nodes)) { g.classList.toggle('on', st.n.includes(id)); g.classList.toggle('dim', !st.n.includes(id)); }
+    for (const [id, e] of Object.entries(stepDg.edges)) e.g.classList.toggle('dim', !st.e.includes(id));
+    run(stepDg, st.e, false);
+    // On a narrow screen the diagram scrolls sideways: bring the active parts into view.
+    const svg = document.getElementById('stepSvg'), box = svg.parentElement;
+    if (box.scrollWidth > box.clientWidth) {
+      const xs = st.n.map((id) => NODES[id]).flatMap((n) => [n.x, n.x + n.w]);
+      const mid = (Math.min(...xs) + Math.max(...xs)) / 2 * (svg.clientWidth / svg.viewBox.baseVal.width);
+      box.scrollTo({ left: mid - box.clientWidth / 2, behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
+  };
+  const playBtn = root.querySelector('[data-act=play]');
+  const stop = () => { clearInterval(timer); timer = null; playBtn.textContent = 'Play'; };
+  root.querySelector('[data-act=back]').onclick = () => { stop(); show(cur - 1); };
+  root.querySelector('[data-act=next]').onclick = () => { stop(); show(cur + 1); };
+  playBtn.onclick = () => {
+    if (timer) return stop();
+    playBtn.textContent = 'Pause';
+    timer = setInterval(() => show(cur + 1), 3000);
+  };
+  show(0);
+
+  // ---------- Interactive demo ----------
+  // Replace with the real rule. Same formula as [the real function, e.g. Module.functionName].
+  // Check the edges: just below WARN, exactly WARN, just below LIMIT, exactly LIMIT.
+  const WARN = 60, LIMIT = 80, MAX = 100;
+  const pct = (v) => (v / MAX * 100) + '%';
+  document.getElementById('bandWarn').style.cssText = `left:${pct(WARN)};width:${pct(LIMIT - WARN)}`;
+  document.getElementById('bandErr').style.left = pct(LIMIT);
+  document.getElementById('markWarn').style.left = pct(WARN);
+  document.getElementById('markLimit').style.left = pct(LIMIT);
+  const slider = document.getElementById('demoValue');
+  const update = () => {
+    const v = Number(slider.value);
+    const [cls, icon, head, body] =
+      v >= LIMIT ? ['err', '✕', '[The system] stops [the action]', `The value is ${v}. The limit is ${LIMIT}.`]
+      : v >= WARN ? ['warn', '!', '[The system] shows a warning', `The value is ${v}. Warnings start at ${WARN}.`]
+      : ['ok', '✓', '[The system] works normally', `The value is ${v}. This is below ${WARN}.`];
+    document.getElementById('demoResult').className = 'result ' + cls;
+    document.getElementById('demoIcon').textContent = icon;
+    document.getElementById('demoHead').textContent = head;
+    document.getElementById('demoBody').textContent = body;
+  };
+  slider.addEventListener('input', update);
+  update();
+})();
+</script>
+<script>
+(function () {
+  var d = document.documentElement;
+  var save = function (k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+
+  // Theme: Auto follows the system; Light and Dark override it.
+  var themeBtns = document.querySelectorAll('[data-theme-btn]');
+  var showTheme = function () {
+    var cur = d.getAttribute('data-theme') || 'auto';
+    themeBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.themeBtn === cur)); });
+  };
+  themeBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = b.dataset.themeBtn;
+      if (t === 'auto') d.removeAttribute('data-theme'); else d.setAttribute('data-theme', t);
+      save('doc-theme', t === 'auto' ? null : t);
+      showTheme();
+    });
+  });
+  showTheme();
+
+  // Text size: five steps from 87.5 % to 150 %.
+  var STEPS = [0.875, 1, 1.125, 1.25, 1.5];
+  var scale = function () { return Number(getComputedStyle(d).getPropertyValue('--scale')) || 1; };
+  document.querySelectorAll('[data-scale-btn]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var dir = Number(b.dataset.scaleBtn), i = STEPS.indexOf(scale());
+      if (i < 0) i = 1;
+      var next = dir === 0 ? 1 : STEPS[Math.min(STEPS.length - 1, Math.max(0, i + dir))];
+      d.style.setProperty('--scale', next);
+      save('doc-scale', next === 1 ? null : next);
+    });
+  });
+})();
+</script>
+</body>
+</html>

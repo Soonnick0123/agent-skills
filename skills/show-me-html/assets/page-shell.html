@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Page title</title>
+<script>
+  // Applies the saved theme and text size before the first paint, so the page does not flash.
+  (function () {
+    var d = document.documentElement;
+    try {
+      var t = localStorage.getItem('doc-theme');
+      if (t === 'light' || t === 'dark') d.setAttribute('data-theme', t);
+      var s = Number(localStorage.getItem('doc-scale'));
+      if (s >= 0.875 && s <= 1.5) d.style.setProperty('--scale', s);
+    } catch (e) { /* storage blocked: defaults apply */ }
+  })();
+</script>
+<style>
+/* ---------- Tokens: light, then dark for "auto" and for an explicit choice ---------- */
+:root {
+  --scale: 1;
+  --bg: #fbf8ff; --surface: #ffffff; --surface-2: #f3eefc; --line: #e4ddf2;
+  --text: #1c1a22; --muted: #5d5868; --primary: #6750a4; --primary-soft: #e9ddff;
+  --on-primary-soft: #4f378b; --warn: #8a5300; --warn-soft: #ffe2bd; --err: #b3261e;
+  --err-soft: #f9dedc; --ok: #1f6b3a; --ok-soft: #d4f1dc; --code-bg: #f1ecf9;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+          "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141218; --surface: #1d1b22; --surface-2: #26232d; --line: #38343f;
+    --text: #e8e3ee; --muted: #b0a9bb; --primary: #cfbcff; --primary-soft: #3b2f5c;
+    --on-primary-soft: #e9ddff; --warn: #ffb95c; --warn-soft: #4a3214; --err: #f2b8b5;
+    --err-soft: #5a1d19; --ok: #8fd9a6; --ok-soft: #1b3d26; --code-bg: #2a2632;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141218; --surface: #1d1b22; --surface-2: #26232d; --line: #38343f;
+  --text: #e8e3ee; --muted: #b0a9bb; --primary: #cfbcff; --primary-soft: #3b2f5c;
+  --on-primary-soft: #e9ddff; --warn: #ffb95c; --warn-soft: #4a3214; --err: #f2b8b5;
+  --err-soft: #5a1d19; --ok: #8fd9a6; --ok-soft: #1b3d26; --code-bg: #2a2632;
+  color-scheme: dark;
+}
+
+/* ---------- Text size: every text size is in rem, so one root value scales the page ---------- */
+html { font-size: calc(100% * var(--scale)); -webkit-text-size-adjust: 100%; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 1rem/1.5 var(--font); font-synthesis: none; overflow-wrap: anywhere; }
+main { max-width: 57.5rem; margin: 0 auto; padding: 1.5rem 1rem 6rem; display: flex; flex-direction: column; gap: 3rem; }
+/* Flex and grid children may shrink below their content, so a wide table scrolls inside its
+   .scroll wrapper instead of widening the whole page. */
+main > *, main section > *, .card > * { min-width: 0; }
+h1 { font-size: 2rem; line-height: 1.25; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.5rem; line-height: 1.33; margin: 0; font-weight: 700; }
+h3 { font-size: 1.125rem; line-height: 1.55; margin: 0; font-weight: 700; }
+p { margin: 0; }
+.small { font-size: 0.875rem; line-height: 1.43; }
+:lang(zh) body, body:lang(zh) { line-height: 1.75; }
+
+/* ---------- Page controls (theme and text size) ----------
+   In px on purpose: the controls keep one size, so they never push themselves off screen
+   when the reader makes the text larger. */
+.doc-controls { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end;
+  padding: 8px 16px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line); }
+.doc-controls .group { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.doc-controls button { font: 700 14px/1 var(--font); min-width: 44px; min-height: 44px; padding: 0 10px;
+  border: 0; background: none; color: var(--text); cursor: pointer; }
+.doc-controls button + button { border-left: 1px solid var(--line); }
+.doc-controls button[aria-pressed="true"] { background: var(--primary); color: var(--surface); }
+.doc-controls button:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+@media (hover: hover) { .doc-controls button:hover:not([aria-pressed="true"]) { background: var(--surface-2); } }
+
+/* ---------- Phone width ---------- */
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.scroll-hint { display: none; }
+@media (max-width: 40rem) {
+  .doc-controls { position: static; }  /* more room to read on a phone */
+  main { gap: 2rem; }
+  h1 { font-size: 1.625rem; }
+  h2 { font-size: 1.25rem; }
+  .scroll-hint { display: block; font-size: 0.75rem; color: var(--muted); }
+}
+
+/* ---------- Back to top (end of the page, desktop and phone) ---------- */
+.to-top-wrap { display: flex; justify-content: center; }
+.to-top { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; padding: 0 1rem;
+  border: 1px solid var(--line); border-radius: 0.5rem; background: var(--surface); color: var(--primary);
+  font-weight: 700; font-size: 0.875rem; text-decoration: none; }
+@media (hover: hover) { .to-top:hover { background: var(--surface-2); } }
+.to-top:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+@media print { .doc-controls, .to-top-wrap { display: none; } }
+</style>
+</head>
+<body>
+<div class="doc-controls" id="top" role="toolbar" aria-label="Page settings">
+  <div class="group" role="group" aria-label="Theme">
+    <button type="button" data-theme-btn="auto" aria-pressed="true" title="Follow the system">Auto</button>
+    <button type="button" data-theme-btn="light" aria-pressed="false">Light</button>
+    <button type="button" data-theme-btn="dark" aria-pressed="false">Dark</button>
+  </div>
+  <div class="group" role="group" aria-label="Text size">
+    <button type="button" data-scale-btn="-1" aria-label="Smaller text">A−</button>
+    <button type="button" data-scale-btn="0" aria-label="Default text size">A</button>
+    <button type="button" data-scale-btn="1" aria-label="Larger text">A+</button>
+  </div>
+</div>
+<main>
+  <!-- Page content. A wide table or diagram goes in:
+       <div class="scroll">…</div><p class="scroll-hint">Swipe sideways to see all of it.</p> -->
+<div class="to-top-wrap"><a class="to-top" href="#top">↑ Back to top</a></div>
+</main>
+<script>
+(function () {
+  var d = document.documentElement;
+  var save = function (k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+
+  // Theme: Auto follows the system; Light and Dark override it.
+  var themeBtns = document.querySelectorAll('[data-theme-btn]');
+  var showTheme = function () {
+    var cur = d.getAttribute('data-theme') || 'auto';
+    themeBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.themeBtn === cur)); });
+  };
+  themeBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = b.dataset.themeBtn;
+      if (t === 'auto') d.removeAttribute('data-theme'); else d.setAttribute('data-theme', t);
+      save('doc-theme', t === 'auto' ? null : t);
+      showTheme();
+    });
+  });
+  showTheme();
+
+  // Text size: five steps from 87.5 % to 150 %.
+  var STEPS = [0.875, 1, 1.125, 1.25, 1.5];
+  var scale = function () { return Number(getComputedStyle(d).getPropertyValue('--scale')) || 1; };
+  document.querySelectorAll('[data-scale-btn]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var dir = Number(b.dataset.scaleBtn), i = STEPS.indexOf(scale());
+      if (i < 0) i = 1;
+      var next = dir === 0 ? 1 : STEPS[Math.min(STEPS.length - 1, Math.max(0, i + dir))];
+      d.style.setProperty('--scale', next);
+      save('doc-scale', next === 1 ? null : next);
+    });
+  });
+})();
+</script>
+</body>
+</html>
