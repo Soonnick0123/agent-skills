@@ -20,7 +20,7 @@ Two assets:
 - `assets/component-reference.html` — every component on the shell, with placeholder text in
   the target style: header with the "Based on" box, key points, terms, the numbered flow
   diagram, procedures, the stepper paired with the diagram, the interactive rule demo, UI state
-  previews, condition → result, options, decisions, open items, sources, back to top. An HTML
+  previews, condition → result, options, decisions, open items, sources. An HTML
   comment above each one says when to use it. Copy the components the document needs, replace
   every `[placeholder]`, and delete the rest. The diagram and the stepper are driven by the
   `NODES`, `EDGES` and `STAGES` data in its script: edit the data, not the SVG.
@@ -202,8 +202,8 @@ The shell's print styles turn the page into a clean document, so "Save as PDF" i
 browser gives a good PDF. Nothing outside the page is needed.
 
 - `<title>` becomes the PDF file name. Make it the page title, not "Document".
-- On paper the page is always light and at one text size. The bar, the side list, Back to
-  top and the "#" links are not printed. A line at the top says the export date.
+- On paper the page is always light and at one text size. The bar, the side list and the
+  "#" links are not printed. A line at the top says the export date.
 - Mark a part that only works on screen (a slider, a "Try it" box) with `class="no-print"`.
   Its rule must also be in words nearby (the Rule box), so the PDF loses nothing.
 - Mark a part for paper only with `class="print-only"`.
@@ -236,9 +236,6 @@ browser gives a good PDF. Nothing outside the page is needed.
 ### Phone width
 
 - The page works at 360 px wide with no horizontal page scroll. Side gutter 16 px.
-- The last item of `<main>` is a **Back to top** link (`href="#top"`, the page bar has
-  `id="top"`), on desktop and on phone. It scrolls smoothly unless the reader asks for reduced
-  motion, and it is hidden in print.
 - Multi-column grids become one column below 40 rem (`repeat(auto-fit, minmax(min(16rem, 100%), 1fr))`
   does this by itself). A stepper of 5–7 cards becomes 2 columns, then 1.
 - Wide tables and SVGs sit in a `.scroll` wrapper (`overflow-x: auto`), followed by a

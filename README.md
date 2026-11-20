@@ -22,7 +22,7 @@ a how-it-works explainer, handbook, runbook, decision record, or a summary of a 
 - **PDF export**: the PDF button opens the browser's print window. Choose "Save as PDF". The
   print styles remove the bar and the controls, keep the page light, print the stepper as a
   list of stages and keep cards on one page.
-  Phone layout and back to top. No external files: the page works offline.
+  Phone layout. No external files: the page works offline.
 
 ### What a page looks like
 

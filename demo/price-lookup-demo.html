@@ -263,13 +263,7 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
 .spin { display: inline-block; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ---------- Back to top (end of the page, desktop and phone) ---------- */
-.to-top-wrap { display: flex; justify-content: center; }
-.to-top { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; padding: 0 1rem;
-  border: 1px solid var(--line); border-radius: 0.5rem; background: var(--surface); color: var(--primary);
-  font-weight: 700; font-size: 0.875rem; text-decoration: none; }
-@media (hover: hover) { .to-top:hover { background: var(--surface-2); } }
-.to-top:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* ---------- Scrolling: the contents links scroll smoothly unless the reader asks for less motion ---------- */
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 
 @media (prefers-reduced-motion: reduce) {
@@ -304,7 +298,7 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
   @page { margin: 16mm 14mm; }
   html { font-size: 87.5% !important; }
   body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-  .doc-bar, .toc-side, .to-top-wrap, .scroll-hint, .h-anchor, .no-print { display: none !important; }
+  .doc-bar, .toc-side, .scroll-hint, .h-anchor, .no-print { display: none !important; }
   .print-only { display: block; }
   .layout { display: block; padding: 0; }
   main { max-width: none; margin: 0; padding: 0; gap: 2rem; }
@@ -319,7 +313,7 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
 </style>
 </head>
 <body>
-<header class="doc-bar" id="top">
+<header class="doc-bar">
   <div class="bar-inner">
     <button type="button" class="nav-btn" aria-expanded="false" aria-controls="docNav">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Contents</span></button>
@@ -569,7 +563,6 @@ input[type=range] { width: 100%; min-height: 2.75rem; accent-color: var(--primar
   </div>
 </section>
 
-<div class="to-top-wrap"><a class="to-top" href="#top">↑ Back to top</a></div>
 </main>
 </div>
 <script>
