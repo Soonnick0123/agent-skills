@@ -2,6 +2,9 @@
 
 Skills for AI coding agents (Claude Code, Codex and others that read `SKILL.md`).
 
+This repository is also a Claude Code plugin marketplace, `soonnick-skills`. Each skill is its
+own plugin, so you install only the skills you need.
+
 ## show-me-html
 
 Turns any material into one self-contained HTML document that people understand quickly:
@@ -53,6 +56,25 @@ by its sentences, so nothing that the screen shows on a click is lost on paper.
 ![Lifecycle section in the PDF, one diagram per stage](docs/screenshots/pdf-stepper.png)
 
 ### Install
+
+**Claude Code (plugin)**: in a Claude Code session, run:
+
+```
+/plugin install show-me-html --marketplace Soonnick0123/agent-skills
+```
+
+This needs Claude Code 2.1.275 or later. On an older version, add the marketplace first:
+
+```
+/plugin marketplace add Soonnick0123/agent-skills
+/plugin install show-me-html@soonnick-skills
+```
+
+To get a newer version later, run `/plugin marketplace update soonnick-skills`. To update
+automatically, turn on auto-update for `soonnick-skills` under **Marketplaces** in `/plugin`.
+As a plugin, the skill is named `show-me-html:show-me-html`.
+
+**Other agents (Codex and others), or Claude Code without the plugin**:
 
 ```sh
 npx skills add Soonnick0123/agent-skills --skill show-me-html

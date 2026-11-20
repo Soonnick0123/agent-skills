@@ -1,0 +1,24 @@
+{
+  "name": "soonnick-skills",
+  "description": "Skills for Claude Code by Soonnick0123. Each skill is its own plugin, so you install only the ones you need.",
+  "owner": {
+    "name": "Soonnick0123",
+    "url": "https://github.com/Soonnick0123"
+  },
+  "plugins": [
+    {
+      "name": "show-me-html",
+      "source": "./skills/show-me-html",
+      "description": "Turn any material into one self-contained HTML document that people understand quickly: diagrams with numbered calls, step-through stages, interactive rule demos, ASD-STE100 writing, light/dark, text size, PDF export.",
+      "author": {
+        "name": "Soonnick0123",
+        "url": "https://github.com/Soonnick0123"
+      },
+      "homepage": "https://soonnick0123.github.io/agent-skills/demo/price-lookup-demo.html",
+      "repository": "https://github.com/Soonnick0123/agent-skills",
+      "license": "MIT",
+      "keywords": ["html", "documentation", "explainer", "handbook", "runbook", "diagram", "pdf", "ste100"],
+      "category": "documentation"
+    }
+  ]
+}
