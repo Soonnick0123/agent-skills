@@ -10,7 +10,9 @@
       "name": "show-me-html",
       "source": "./",
       "strict": false,
-      "skills": ["./skills/show-me-html"],
+      "skills": [
+        "./skills/show-me-html"
+      ],
       "description": "Turn any material into one self-contained HTML document that people understand quickly: diagrams with numbered calls, step-through stages, interactive rule demos, ASD-STE100 writing, light/dark, text size, PDF export.",
       "author": {
         "name": "Soonnick0123",
@@ -19,8 +21,44 @@
       "homepage": "https://soonnick0123.github.io/agent-skills/demo/price-lookup-demo.html",
       "repository": "https://github.com/Soonnick0123/agent-skills",
       "license": "MIT",
-      "keywords": ["html", "documentation", "explainer", "handbook", "runbook", "diagram", "pdf", "ste100"],
+      "keywords": [
+        "html",
+        "documentation",
+        "explainer",
+        "handbook",
+        "runbook",
+        "diagram",
+        "pdf",
+        "ste100"
+      ],
       "category": "documentation"
+    },
+    {
+      "name": "ui-design-tokens",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/ui-design-tokens"
+      ],
+      "description": "Keep generated UI consistent: 8pt spacing grid, modular type scale, font and CJK rules, button specs, motion timing, contrast, and restraint in explanatory text. Includes a read-only review mode that audits existing UI and reports each violation with a token-based fix.",
+      "author": {
+        "name": "Soonnick0123",
+        "url": "https://github.com/Soonnick0123"
+      },
+      "repository": "https://github.com/Soonnick0123/agent-skills",
+      "license": "MIT",
+      "keywords": [
+        "ui",
+        "design-tokens",
+        "design-system",
+        "spacing",
+        "typography",
+        "tailwind",
+        "shadcn",
+        "accessibility",
+        "review"
+      ],
+      "category": "design"
     }
   ]
 }
