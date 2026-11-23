@@ -7,6 +7,31 @@
   },
   "plugins": [
     {
+      "name": "all-skills",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/show-me-html",
+        "./skills/ui-design-tokens"
+      ],
+      "description": "Every skill in this marketplace in one plugin: show-me-html and ui-design-tokens. Install this or the single-skill plugins, not both, or each skill loads twice.",
+      "author": {
+        "name": "Soonnick0123",
+        "url": "https://github.com/Soonnick0123"
+      },
+      "repository": "https://github.com/Soonnick0123/agent-skills",
+      "license": "MIT",
+      "keywords": [
+        "bundle",
+        "collection",
+        "html",
+        "documentation",
+        "ui",
+        "design-tokens"
+      ],
+      "category": "productivity"
+    },
+    {
       "name": "show-me-html",
       "source": "./",
       "strict": false,

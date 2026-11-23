@@ -15,7 +15,7 @@
 
 ## 安裝
 
-把 `<skill>` 換成上表中的名稱。
+把 `<skill>` 換成上表中的名稱。用 Claude Code plugin 安裝時，也可以換成 `all-skills`，把全部 skill 裝成一個 plugin。`all-skills` 和單獨的 skill 只能二選一，兩種都裝的話，每個 skill 都會載入兩次。
 
 **Claude Code（plugin）**：在 Claude Code 對話中執行：
 

@@ -16,7 +16,9 @@ own plugin, so you install only the skills you need.
 
 ## Install
 
-Replace `<skill>` with a name from the table.
+Replace `<skill>` with a name from the table. For the Claude Code plugin, you can also use
+`all-skills` to install every skill as one plugin. Install `all-skills` or single skills, not
+both: otherwise each skill loads twice.
 
 **Claude Code (plugin)**: in a Claude Code session, run:
 
