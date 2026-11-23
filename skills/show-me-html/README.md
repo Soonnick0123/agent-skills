@@ -52,36 +52,20 @@ by its sentences, so nothing that the screen shows on a click is lost on paper.
 
 ## Install
 
-**Claude Code (plugin)**: in a Claude Code session, run:
+**Claude Code**: run in a terminal, then restart Claude Code.
 
-```
-/plugin install show-me-html --marketplace Soonnick0123/agent-skills
-```
-
-This needs Claude Code 2.1.275 or later. On an older version, add the marketplace first:
-
-```
-/plugin marketplace add Soonnick0123/agent-skills
-/plugin install show-me-html@soonnick-skills
+```sh
+claude plugin marketplace add Soonnick0123/agent-skills
+claude plugin install show-me-html@soonnick-skills
 ```
 
-To get a newer version later, run `/plugin marketplace update soonnick-skills`. To update
-automatically, turn on auto-update for `soonnick-skills` under **Marketplaces** in `/plugin`.
-As a plugin, the skill is named `show-me-html:show-me-html`.
-
-**Other agents (Codex and others), or Claude Code without the plugin**:
+**Other agents (Codex and others)**:
 
 ```sh
 npx skills add Soonnick0123/agent-skills --skill show-me-html
 ```
 
-Install only for Claude Code, for all your projects:
-
-```sh
-npx skills add Soonnick0123/agent-skills --skill show-me-html -a claude-code -g
-```
-
-Or copy `skills/show-me-html/` into `~/.claude/skills/` (or `.claude/skills/` in a project).
+To install every skill at once, see the [main README](../../README.md#install).
 
 ## Use
 

@@ -14,28 +14,20 @@
 
 ## 安裝
 
-**Claude Code（plugin）**：
+**Claude Code**：在終端機執行，然後重新啟動 Claude Code。
 
-```
-/plugin install ui-design-tokens --marketplace Soonnick0123/agent-skills
-```
-
-Claude Code 2.1.275 以下的版本：
-
-```
-/plugin marketplace add Soonnick0123/agent-skills
-/plugin install ui-design-tokens@soonnick-skills
+```sh
+claude plugin marketplace add Soonnick0123/agent-skills
+claude plugin install ui-design-tokens@soonnick-skills
 ```
 
-以 plugin 安裝時，skill 的名稱是 `ui-design-tokens:ui-design-tokens`。
-
-**其他 agent，或不用 plugin 的 Claude Code**：
+**其他 agent（Codex 等）**：
 
 ```sh
 npx skills add Soonnick0123/agent-skills --skill ui-design-tokens
 ```
 
-也可以把 `skills/ui-design-tokens/` 複製到 `~/.claude/skills/`（或項目裏的 `.claude/skills/`）。
+要一次安裝全部 skill，請看[主 README](../../README.zh-TW.md#安裝)。
 
 ## 使用
 

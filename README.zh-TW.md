@@ -4,7 +4,7 @@
 
 給 AI 編程 agent 用的 skill（Claude Code、Codex，以及其他會讀 `SKILL.md` 的 agent）。
 
-這個 repo 同時也是一個 Claude Code plugin marketplace，名稱是 `soonnick-skills`。每個 skill 都是獨立的 plugin，你只需要安裝用得到的。
+這個 repo 同時也是一個 Claude Code plugin marketplace，名稱是 `soonnick-skills`。
 
 ## Skill 一覽
 
@@ -15,32 +15,38 @@
 
 ## 安裝
 
-把 `<skill>` 換成上表中的名稱。用 Claude Code plugin 安裝時，也可以換成 `all-skills`，把全部 skill 裝成一個 plugin。`all-skills` 和單獨的 skill 只能二選一，兩種都裝的話，每個 skill 都會載入兩次。
+**Claude Code**：在終端機執行，然後重新啟動 Claude Code。
 
-**Claude Code（plugin）**：在 Claude Code 對話中執行：
-
-```
-/plugin install <skill> --marketplace Soonnick0123/agent-skills
-```
-
-這需要 Claude Code 2.1.275 或以上版本。舊版本要先加入 marketplace：
-
-```
-/plugin marketplace add Soonnick0123/agent-skills
-/plugin install <skill>@soonnick-skills
-```
-
-以後要更新，執行 `/plugin marketplace update soonnick-skills`。想自動更新的話，在 `/plugin` 的 **Marketplaces** 裏為 `soonnick-skills` 開啟自動更新。
-
-**其他 agent（Codex 等），或不用 plugin 的 Claude Code**：
+安裝全部 skill：
 
 ```sh
-npx skills add Soonnick0123/agent-skills --skill <skill>
+claude plugin marketplace add Soonnick0123/agent-skills
+claude plugin install all-skills@soonnick-skills
 ```
 
-也可以把 `skills/<skill>/` 複製到 `~/.claude/skills/`（或項目裏的 `.claude/skills/`）。
+或者只裝需要的 skill：
 
-每個 skill 的 README 都有各自的安裝說明和使用例子。
+```sh
+claude plugin marketplace add Soonnick0123/agent-skills
+claude plugin install show-me-html@soonnick-skills
+claude plugin install ui-design-tokens@soonnick-skills
+```
+
+`all-skills` 和單獨的 skill 只能二選一，兩種都裝的話，每個 skill 都會載入兩次。
+
+更新到最新版本：
+
+```sh
+claude plugin marketplace update soonnick-skills
+claude plugin update all-skills@soonnick-skills
+```
+
+**其他 agent（Codex 等）**：
+
+```sh
+npx skills add Soonnick0123/agent-skills --skill show-me-html
+npx skills add Soonnick0123/agent-skills --skill ui-design-tokens
+```
 
 ## 授權
 

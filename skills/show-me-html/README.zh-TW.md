@@ -35,34 +35,20 @@
 
 ## 安裝
 
-**Claude Code（plugin）**：在 Claude Code 對話中執行：
+**Claude Code**：在終端機執行，然後重新啟動 Claude Code。
 
-```
-/plugin install show-me-html --marketplace Soonnick0123/agent-skills
-```
-
-這需要 Claude Code 2.1.275 或以上版本。舊版本要先加入 marketplace：
-
-```
-/plugin marketplace add Soonnick0123/agent-skills
-/plugin install show-me-html@soonnick-skills
+```sh
+claude plugin marketplace add Soonnick0123/agent-skills
+claude plugin install show-me-html@soonnick-skills
 ```
 
-以後要更新，執行 `/plugin marketplace update soonnick-skills`。想自動更新的話，在 `/plugin` 的 **Marketplaces** 裏為 `soonnick-skills` 開啟自動更新。以 plugin 安裝時，skill 的名稱是 `show-me-html:show-me-html`。
-
-**其他 agent（Codex 等），或不用 plugin 的 Claude Code**：
+**其他 agent（Codex 等）**：
 
 ```sh
 npx skills add Soonnick0123/agent-skills --skill show-me-html
 ```
 
-只為 Claude Code 安裝，並套用到你所有的項目：
-
-```sh
-npx skills add Soonnick0123/agent-skills --skill show-me-html -a claude-code -g
-```
-
-也可以把 `skills/show-me-html/` 複製到 `~/.claude/skills/`（或項目裏的 `.claude/skills/`）。
+要一次安裝全部 skill，請看[主 README](../../README.zh-TW.md#安裝)。
 
 ## 使用
 

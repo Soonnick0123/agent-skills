@@ -22,28 +22,20 @@ a small, closed scale, so the agent picks from a table instead of inventing a nu
 
 ## Install
 
-**Claude Code (plugin)**:
+**Claude Code**: run in a terminal, then restart Claude Code.
 
-```
-/plugin install ui-design-tokens --marketplace Soonnick0123/agent-skills
-```
-
-On Claude Code older than 2.1.275:
-
-```
-/plugin marketplace add Soonnick0123/agent-skills
-/plugin install ui-design-tokens@soonnick-skills
+```sh
+claude plugin marketplace add Soonnick0123/agent-skills
+claude plugin install ui-design-tokens@soonnick-skills
 ```
 
-As a plugin, the skill is named `ui-design-tokens:ui-design-tokens`.
-
-**Other agents, or Claude Code without the plugin**:
+**Other agents (Codex and others)**:
 
 ```sh
 npx skills add Soonnick0123/agent-skills --skill ui-design-tokens
 ```
 
-Or copy `skills/ui-design-tokens/` into `~/.claude/skills/` (or `.claude/skills/` in a project).
+To install every skill at once, see the [main README](../../README.md#install).
 
 ## Use
 
