@@ -8,7 +8,9 @@
   "plugins": [
     {
       "name": "show-me-html",
-      "source": "./skills/show-me-html",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/show-me-html"],
       "description": "Turn any material into one self-contained HTML document that people understand quickly: diagrams with numbered calls, step-through stages, interactive rule demos, ASD-STE100 writing, light/dark, text size, PDF export.",
       "author": {
         "name": "Soonnick0123",
